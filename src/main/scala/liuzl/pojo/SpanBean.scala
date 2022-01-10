@@ -1,0 +1,33 @@
+package liuzl.pojo
+
+case class SpanBean(
+                     version	:String,
+                     agentId	:String,
+                     applicationId	:String,
+                     agentStartTime	:String,
+                     transactionId	:String,
+                     spanId	:String,
+                     parentSpanId	:String,
+                     parentApplicationId	:String,
+                     parentApplicationServiceType	:String,
+                     startTime	:String,
+                     elapsed	:String,
+                     rpc	:String,
+                     serviceType	:String,
+                     endPoint	:String,
+                     apiId	:String,
+                     annotationBoList	:String,
+                     flag	:String,
+                     errCode	:String,
+                     spanEventBoList	:String,
+                     collectorAcceptTime	:String,
+                     exceptionId	:String,
+                     exceptionMessage	:String,
+                     exceptionClass	:String,
+                     applicationServiceType	:String,
+                     acceptorHost	:String,
+                     remoteAddr	:String,
+                     loggingTransactionInfo	:String,
+                     root	:String,
+                     rawVersion	:String
+                   ){}
