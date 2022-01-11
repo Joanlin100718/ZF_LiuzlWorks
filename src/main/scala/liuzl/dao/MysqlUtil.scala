@@ -2,7 +2,7 @@ package liuzl.dao
 
 
 import com.mchange.v2.c3p0.ComboPooledDataSource
-import liuzl.pojo.{AgentBean, AgentTailBean, ApiBean, ChuckBean, SpanBean, SqlBean, StatBean, StrBean, UnknownBean}
+import liuzl.pojo.{AgentBean, AgentTailBean, ApiBean, SpanChuckBean, SpanBean, SqlBean, StatBean, StrBean, UnknownBean}
 
 import java.sql.Connection
 import java.sql.PreparedStatement
@@ -21,8 +21,8 @@ object MysqlUtil {
     var rs:ResultSet=null
     try {
       conn=c3p0.getConnection
-      //如果当天还没有数据,则新增插入
-      ps=conn.prepareStatement("insert into agent values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+      //SQL语句
+      ps=conn.prepareStatement("insert into agent values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW())")
       ps.setString( 1  ,	agentBean.hostName	)
       ps.setString( 2  ,	agentBean.ip	)
       ps.setString( 3  ,	agentBean.ports	)
@@ -53,6 +53,8 @@ object MysqlUtil {
       ps.setString( 28  ,	agentBean.setEndStatus	)
       ps.setString( 29  ,	agentBean.container)
 
+      println("************************存一个*************************")
+      println()
       ps.executeUpdate()
 
 
@@ -70,8 +72,8 @@ object MysqlUtil {
     var rs:ResultSet=null
     try {
       conn=c3p0.getConnection
-      //如果当天还没有数据,则新增插入
-      ps=conn.prepareStatement("insert into agent_tail values(?,?,?,?,?,?)")
+      //SQL语句
+      ps=conn.prepareStatement("insert into agent_tail values(?,?,?,?,?,?,NOW())")
       ps.setString( 1  ,	agentTailBean.version	)
       ps.setString( 2  ,	agentTailBean.agentId	)
       ps.setString( 3  ,	agentTailBean.startTimestamp	)
@@ -79,6 +81,8 @@ object MysqlUtil {
       ps.setString( 5  ,	agentTailBean.eventIdentifier	)
       ps.setString( 6  ,	agentTailBean.agentLifeCycleState	)
 
+      println("************************存一个*************************")
+      println()
       ps.executeUpdate()
 
 
@@ -98,8 +102,8 @@ object MysqlUtil {
 
     try {
       conn=c3p0.getConnection
-      //如果当天还没有数据,则新增插入
-      ps=conn.prepareStatement("insert into str values(?,?,?,?,?,?,?,?)")
+      //SQL语句
+      ps=conn.prepareStatement("insert into str values(?,?,?,?,?,?,?,?,NOW())")
       ps.setString(	1	, strBean.agentId	)
       ps.setString(	2	, strBean.startTime	)
       ps.setString(	3	, strBean.stringId	)
@@ -108,8 +112,9 @@ object MysqlUtil {
       ps.setString(	6	, strBean.setAgentStartTime	)
       ps.setString(	7	, strBean.setStringId	)
       ps.setString(	8	, strBean.setStringValue	)
-      println("开始存储喽")
-      println(ps)
+
+      println("************************存一个*************************")
+      println()
       ps.executeUpdate()
 
 
@@ -121,7 +126,7 @@ object MysqlUtil {
       if(conn!=null)conn.close
     }
   }
-  def saveTo_apiBean( topic:String ,  apiBean: ApiBean ) = {
+  def saveTo_apiBean( apiBean: ApiBean ) = {
 
     //     agentBean: AgentBean * ,apiBean: ApiBean , chuckBean: ChuckBean,spanBean: SpanBean,sqlBean: SqlBean,statBean: StatBean,strBean: StrBean
 
@@ -131,14 +136,26 @@ object MysqlUtil {
 
     try {
       conn=c3p0.getConnection
-      //如果当天还没有数据,则新增插入
-      topic match{
-        case str => {
-          ps=conn.prepareStatement("insert into str values(?,?,?,?,?,?,?,?)")
-          ps.setString(	1	, ""	)
-          ps.executeUpdate()
-        }
-      }
+      //SQL语句
+      ps=conn.prepareStatement("insert into api values(?,?,?,?,?,?,?,?,?,?,?,?,?,NOW())")
+      ps.setString( 1 ,	apiBean.agentId	)
+      ps.setString( 2 ,	apiBean.startTime	)
+      ps.setString( 3 ,	apiBean.apiId	)
+      ps.setString( 4 ,	apiBean.apiInfo	)
+      ps.setString( 5 ,	apiBean.lineNumber	)
+      ps.setString( 6 ,	apiBean.methodTypeEnum	)
+      ps.setString( 7 ,apiBean.description)
+      ps.setString( 8 ,	apiBean.setLine	)
+      ps.setString( 9 ,	apiBean.setType	)
+      ps.setString( 10 ,	apiBean.setAgentId	)
+      ps.setString( 11 ,	apiBean.setAgentStartTime	)
+      ps.setString( 12 ,	apiBean.setApiId	)
+      ps.setString( 13 ,	apiBean.setApiInfo	)
+
+
+      println("************************存一个*************************")
+      println()
+      ps.executeUpdate()
 
 
     } catch {
@@ -149,7 +166,7 @@ object MysqlUtil {
       if(conn!=null)conn.close
     }
   }
-  def saveTo_chuckBean( topic:String ,  chuckBean: ChuckBean ) = {
+  def saveTo_spanChuckBean(spanChuckBean: SpanChuckBean ) = {
 
     //     agentBean: AgentBean * ,apiBean: ApiBean , chuckBean: ChuckBean,spanBean: SpanBean,sqlBean: SqlBean,statBean: StatBean,strBean: StrBean
 
@@ -159,14 +176,22 @@ object MysqlUtil {
 
     try {
       conn=c3p0.getConnection
-      //如果当天还没有数据,则新增插入
-      topic match{
-        case str => {
-          ps=conn.prepareStatement("insert into str values(?,?,?,?,?,?,?,?)")
-          ps.setString(	1	, ""	)
-          ps.executeUpdate()
-        }
-      }
+      //
+      ps=conn.prepareStatement("insert into spanChuck values(?,?,?,?,?,?,?,?,?,?,NOW())")
+      ps.setString(1,	spanChuckBean.version	)
+      ps.setString(2,	spanChuckBean.agentId	)
+      ps.setString(3,	spanChuckBean.applicationId	)
+      ps.setString(4,	spanChuckBean.agentStartTime	)
+      ps.setString(5,	spanChuckBean.transactionId	)
+      ps.setString(6,	spanChuckBean.spanId	)
+      ps.setString(7,	spanChuckBean.endPoint	)
+      ps.setString(8,	spanChuckBean.serviceType	)
+      ps.setString(9,	spanChuckBean.applicationServiceType	)
+      ps.setString(10,	spanChuckBean.spanEventBoList	)
+
+      println("************************存一个*************************")
+      println()
+      ps.executeUpdate()
 
 
     } catch {
@@ -177,7 +202,7 @@ object MysqlUtil {
       if(conn!=null)conn.close
     }
   }
-  def saveTo_spanBean( topic:String ,  spanBean: SpanBean ) = {
+  def saveTo_spanBean(  spanBean: SpanBean ) = {
 
     //     agentBean: AgentBean * ,apiBean: ApiBean , chuckBean: ChuckBean,spanBean: SpanBean,sqlBean: SqlBean,statBean: StatBean,strBean: StrBean
 
@@ -187,14 +212,41 @@ object MysqlUtil {
 
     try {
       conn=c3p0.getConnection
-      //如果当天还没有数据,则新增插入
-      topic match{
-        case str => {
-          ps=conn.prepareStatement("insert into str values(?,?,?,?,?,?,?,?)")
-          ps.setString(	1	, ""	)
-          ps.executeUpdate()
-        }
-      }
+      //SQL语句
+      ps=conn.prepareStatement("insert into span values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW())")
+      ps.setString( 1  , spanBean.version)
+      ps.setString( 2  , spanBean.agentId)
+      ps.setString( 3  , spanBean.applicationId)
+      ps.setString( 4  , spanBean.agentStartTime)
+      ps.setString( 5  , spanBean.transactionId)
+      ps.setString( 6  , spanBean.spanId)
+      ps.setString( 7  , spanBean.parentSpanId)
+      ps.setString( 8  , spanBean.parentApplicationId)
+      ps.setString( 9  , spanBean.parentApplicationServiceType)
+      ps.setString( 10  , spanBean.startTime)
+      ps.setString( 11  , spanBean.elapsed)
+      ps.setString( 12  , spanBean.rpc)
+      ps.setString( 13  , spanBean.serviceType)
+      ps.setString( 14  , spanBean.endPoint)
+      ps.setString( 15  , spanBean.apiId)
+      ps.setString( 16  , spanBean.annotationBoList)
+      ps.setString( 17  , spanBean.flag)
+      ps.setString( 18  , spanBean.errCode)
+      ps.setString( 19  , spanBean.spanEventBoList)
+      ps.setString( 20  , spanBean.collectorAcceptTime)
+      ps.setString( 21  , spanBean.exceptionId)
+      ps.setString( 22  , spanBean.exceptionMessage)
+      ps.setString( 23  , spanBean.exceptionClass)
+      ps.setString( 24  , spanBean.applicationServiceType)
+      ps.setString( 25  , spanBean.acceptorHost)
+      ps.setString( 26  , spanBean.remoteAddr)
+      ps.setString( 27  , spanBean.loggingTransactionInfo)
+      ps.setString( 28  , spanBean.root)
+      ps.setString( 29  , spanBean.rawVersion)
+
+      println("************************存一个*************************")
+      println()
+      ps.executeUpdate()
 
 
     } catch {
@@ -205,7 +257,7 @@ object MysqlUtil {
       if(conn!=null)conn.close
     }
   }
-  def saveTo_sqlBean( topic:String ,  sqlBean: SqlBean ) = {
+  def saveTo_sqlBean( sqlBean: SqlBean ) = {
 
     //     agentBean: AgentBean * ,apiBean: ApiBean , chuckBean: ChuckBean,spanBean: SpanBean,sqlBean: SqlBean,statBean: StatBean,strBean: StrBean
 
@@ -215,14 +267,21 @@ object MysqlUtil {
 
     try {
       conn=c3p0.getConnection
-      //如果当天还没有数据,则新增插入
-      topic match{
-        case str => {
-          ps=conn.prepareStatement("insert into str values(?,?,?,?,?,?,?,?)")
-          ps.setString(	1	, ""	)
-          ps.executeUpdate()
-        }
-      }
+      //SQL语句
+      ps=conn.prepareStatement("insert into `sql` values(?,?,?,?,?,?,?,?,?,NOW())")
+      ps.setString( 1  ,	sqlBean.agentId	)
+      ps.setString( 2  ,	sqlBean.startTime	)
+      ps.setString( 3  ,	sqlBean.sqlId	)
+      ps.setString( 4  ,	sqlBean.sql	)
+      ps.setString( 5  ,	sqlBean.hashcode	)
+      ps.setString( 6  ,	sqlBean.setAgentId	)
+      ps.setString( 7  ,	sqlBean.setAgentStartTime	)
+      ps.setString( 8  ,	sqlBean.setSqlId	)
+      ps.setString( 9  ,	sqlBean.setSql	)
+
+      println("************************存一个*************************")
+      println()
+      ps.executeUpdate()
 
 
     } catch {
@@ -233,7 +292,7 @@ object MysqlUtil {
       if(conn!=null)conn.close
     }
   }
-  def saveTo_statBean( topic:String ,  statBean: StatBean ) = {
+  def saveTo_statBean( statBean: StatBean ) = {
 
     //     agentBean: AgentBean * ,apiBean: ApiBean , chuckBean: ChuckBean,spanBean: SpanBean,sqlBean: SqlBean,statBean: StatBean,strBean: StrBean
 
@@ -243,16 +302,19 @@ object MysqlUtil {
 
     try {
       conn=c3p0.getConnection
-      //如果当天还没有数据,则新增插入
-      topic match{
-        case str => {
-          ps=conn.prepareStatement("insert into str values(?,?,?,?,?,?,?,?)")
-          ps.setString(	1	, ""	)
-          ps.executeUpdate()
-        }
-      }
+      //SQL语句
+      ps=conn.prepareStatement("insert into stat values(?,?,?,?,?,?,?,NOW())")
+      ps.setString( 1  , 	statBean.agentId	)
+      ps.setString( 2  , 	statBean.jvmGcBos	)
+      ps.setString( 3  , 	statBean.jvmGcDetailedBos	)
+      ps.setString( 4  , 	statBean.cpuLoadBos	)
+      ps.setString( 5  , 	statBean.transactionBos	)
+      ps.setString( 6  , 	statBean.activeTraceBos	)
+      ps.setString( 7  , 	statBean.dataSourceListBos	)
 
-
+      println("************************存一个*************************")
+      println()
+      ps.executeUpdate()
     } catch {
       case t: Throwable => t.printStackTrace() // TODO: handle error
     }finally {
@@ -271,10 +333,10 @@ object MysqlUtil {
 
     try {
       conn=c3p0.getConnection
-      //如果当天还没有数据,则新增插入
+      //SQL语句
       topic match{
         case str => {
-          ps=conn.prepareStatement("insert into str values(?,?,?,?,?,?,?,?)")
+          ps=conn.prepareStatement("insert into str values(?,?,?,?,?,?,?,?,NOW())")
           ps.setString(	1	, ""	)
           ps.executeUpdate()
         }

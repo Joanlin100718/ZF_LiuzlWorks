@@ -2,11 +2,12 @@ package liuzl.pojo
 
 case class ApiBean(
                     agentId	:String,
-                    agentStartTime	:String,
+                    startTime	:String,
                     apiId	:String,
                     apiInfo	:String,
-                    line	:String,
-                    `type`	:String,
+                    lineNumber	:String,
+                    methodTypeEnum	:String,
+                    description :String,
                     setLine	:String,
                     setType	:String,
                     setAgentId	:String,
