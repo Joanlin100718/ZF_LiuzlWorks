@@ -1,3 +1,5 @@
 package liuzl.pojo
 
-case class UnknownBean(){}
+case class UnknownBean(
+                      values :String
+                      ){}

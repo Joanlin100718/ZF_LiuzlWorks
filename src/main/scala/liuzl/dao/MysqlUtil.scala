@@ -11,6 +11,56 @@ import java.sql.ResultSet
 object MysqlUtil {
   
   val c3p0=new ComboPooledDataSource
+
+  def selectAndUpdateOffset(topic:String , offset:Long , partition : Int) : Boolean ={
+    var conn:Connection=null
+    var ps:PreparedStatement=null
+    var ps1:PreparedStatement=null
+    var rs:ResultSet=null
+    var res:Boolean = false
+    try {
+      conn=c3p0.getConnection
+
+      // 查询offset
+      //SQL语句
+      val SQLSentence = "select partition" + partition + "  from historicalOffset where kafkaTopic = \"" + topic  + "\" ;"
+      ps = conn.prepareStatement(SQLSentence)
+      rs = ps.executeQuery()
+
+      while (rs.next()){
+
+        val tableOffset = rs.getString("partition" + partition)
+
+        if (offset > tableOffset.toInt){
+
+          // 更新offset
+          val updateSQL = "update historicalOffset set partition" + partition + "  = ?  where kafkaTopic =  ? "
+
+          ps1 = conn.prepareStatement( updateSQL )
+          ps1.setLong(1, offset)
+          ps1.setString(2,topic)
+
+          ps1.executeUpdate()
+
+          res = true
+        } else {
+          res = false
+        }
+      }
+      res
+
+    } catch {
+      case t: Throwable => t.printStackTrace() // TODO: handle error
+      res
+    }finally {
+      if(ps!=null)ps.close
+      if(ps1!=null)ps1.close
+      if(rs!=null)rs.close
+      if(conn!=null)conn.close
+    }
+
+  }
+
   
   /**
    * 数据存储到对应表中
@@ -323,7 +373,7 @@ object MysqlUtil {
       if(conn!=null)conn.close
     }
   }
-  def saveTo_unknownBean( topic:String ,  unknownBean: UnknownBean ) = {
+  def saveTo_unknownBean(  unknownBean: UnknownBean ): Unit = {
 
     //     agentBean: AgentBean * ,apiBean: ApiBean , chuckBean: ChuckBean,spanBean: SpanBean,sqlBean: SqlBean,statBean: StatBean,strBean: StrBean
 
@@ -334,13 +384,13 @@ object MysqlUtil {
     try {
       conn=c3p0.getConnection
       //SQL语句
-      topic match{
-        case str => {
-          ps=conn.prepareStatement("insert into str values(?,?,?,?,?,?,?,?,NOW())")
-          ps.setString(	1	, ""	)
-          ps.executeUpdate()
-        }
-      }
+      ps=conn.prepareStatement("insert into `unknown` values(?,NOW())")
+      ps.setString(	1	, unknownBean.values	)
+
+      println("************************存一个*************************")
+      println()
+      ps.executeUpdate()
+
 
 
     } catch {
@@ -350,6 +400,28 @@ object MysqlUtil {
       if(rs!=null)rs.close
       if(conn!=null)conn.close
     }
+  }
+
+  def getTableName(topics : String): String ={
+    var res = ""
+    if (topics.contains("AIOPS_ETE_SERVFRAMETOPO")){
+      res = "span"
+    } else if (topics.contains("AIOPS_ETE_SERVCHUNKTOPO")){
+      res = "spanChunk"
+    } else if (topics.contains("AIOPS_ETE_SERVSTATTOPO")){
+      res = "stat"
+    } else if (topics.contains("AIOPS_ETE_SERVAGENTTOPO")){
+      res = "agent"
+    } else if (topics.contains("AIOPS_ETE_SERVAPITOPO")){
+      res = "api"
+    } else if (topics.contains("AIOPS_ETE_SERVSTRTOPO")){
+      res = "str"
+    } else if (topics.contains("AIOPS_ETE_SERVSQLTOPO")){
+      res = "sql"
+    } else if (topics.contains("AIOPS_ETE_SERVUNKNOWN")){
+      res = "unknown"
+    }
+    res
   }
 
 }

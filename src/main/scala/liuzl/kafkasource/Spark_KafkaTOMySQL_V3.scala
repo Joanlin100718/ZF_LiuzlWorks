@@ -2,7 +2,7 @@ package liuzl.kafkasource
 
 import com.alibaba.fastjson.JSON
 import liuzl.dao.MysqlUtil
-import liuzl.pojo._
+import liuzl.pojo.{UnknownBean, _}
 import org.apache.kafka.clients.consumer
 import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord}
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -25,6 +25,7 @@ object Spark_KafkaTOMySQL_V3 {
       .setMaster("local[*]")
       .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
 
+
     val ssc = new StreamingContext(conf, Seconds(10))
     conf.registerKryoClasses(Array(classOf[ConsumerRecord[String, String]]))
     ssc.sparkContext.setLogLevel("WARN")
@@ -43,15 +44,16 @@ object Spark_KafkaTOMySQL_V3 {
 
     // 定义topic列表
     val topicsSet = (
-//                      "AIOPS_ETE_SERVFRAMETOPO,"  +  //span
-//                      "AIOPS_ETE_SERVCHUNKTOPO,"  +   //spanChunk
-                      "AIOPS_ETE_SERVSTATTOPO,"      //stat
-//                      "AIOPS_ETE_SERVAGENTTOPO," +    //agent
-//                      "AIOPS_ETE_SERVAPITOPO," +     //api
-//                      "AIOPS_ETE_SERVSTRTOPO,"  +     //str
-//                      "AIOPS_ETE_SERVSQLTOPO,"       //sql
+                      "AIOPS_ETE_SERVFRAMETOPO,"  +  //span
+                      "AIOPS_ETE_SERVCHUNKTOPO,"  +   //spanChunk
+//                      "AIOPS_ETE_SERVSTATTOPO,"   +   //stat
+                      "AIOPS_ETE_SERVAGENTTOPO," +    //agent
+                      "AIOPS_ETE_SERVAPITOPO," +     //api
+                      "AIOPS_ETE_SERVSTRTOPO,"  +     //str
+                      "AIOPS_ETE_SERVUNKNOWN,"   +     // unknown
+                      "AIOPS_ETE_SERVSQLTOPO,"       //sql
       ).split(",").toSet
-//    val topicsSet = "AIOPS_ETE_SERVSQLTOPO".split(",").toSet
+//    val topicsSet = "AIOPS_ETE_SERVSTRTOPO".split(",").toSet
 
     // 添加topic配置
     val kafkaParams = Map[String, Object](
@@ -59,8 +61,8 @@ object Spark_KafkaTOMySQL_V3 {
       ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG -> classOf[StringDeserializer],
       ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG -> classOf[StringDeserializer],
       ConsumerConfig.GROUP_ID_CONFIG -> "Liuzl",
-//      ConsumerConfig.AUTO_OFFSET_RESET_CONFIG -> "earliest",
-      ConsumerConfig.AUTO_OFFSET_RESET_CONFIG -> "latest",
+      ConsumerConfig.AUTO_OFFSET_RESET_CONFIG -> "earliest",
+//      ConsumerConfig.AUTO_OFFSET_RESET_CONFIG -> "latest",
       ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG -> (false: java.lang.Boolean)
 
     )
@@ -76,27 +78,33 @@ object Spark_KafkaTOMySQL_V3 {
       while (lines.hasNext) {
         val line = lines.next() // 获取每一行的数据
 
-        val topics = line.topic()  // 获取对应的topic
+        val offset = line.offset()        // 获取对应的offset
+        val partition = line.partition()  // 获取对应的partition编号
+        val topics = line.topic()         // 获取对应的topic
         val valJson =  line.value() // 获取每一行中的value值
 
-        // 打印具体的topic值
-        printTopic(topics)
-//        println("topic:\t" + topics)
-        println("value:\t" + valJson)
+        if (MysqlUtil.selectAndUpdateOffset(topics , offset , partition)) {
 
-        /*    需要采集的topics
-        span      	  AIOPS_ETE_SERVFRAMETOPO
-        spanChunk	    AIOPS_ETE_SERVCHUNKTOPO
-        stat  	      AIOPS_ETE_SERVSTATTOPO
-        agent     	  AIOPS_ETE_SERVAGENTTOPO
-        api      	    AIOPS_ETE_SERVAPITOPO
-        str     	    AIOPS_ETE_SERVSTRTOPO
-        sql       	  AIOPS_ETE_SERVSQLTOPO
-        unknown  	    AIOPS_ETE_SERVUNKNOWN
-        */
+          // 打印数据列表
+          print("数据分区：" + partition)
+          printTopic(topics)
+          println("数据列表：" + line)
+          //        println("topic:\t" + topics)
+          //        println("value:\t" + valJson)
 
-        // 根据topic判断，处理topic列表中的每一个topic
-        if (topics.equals("AIOPS_ETE_SERVAGENTTOPO")){   // agent     	  AIOPS_ETE_SERVAGENTTOPO
+            /*    需要采集的topics
+          span      	  AIOPS_ETE_SERVFRAMETOPO
+          spanChunk	    AIOPS_ETE_SERVCHUNKTOPO
+          stat  	      AIOPS_ETE_SERVSTATTOPO
+          agent     	  AIOPS_ETE_SERVAGENTTOPO
+          api      	    AIOPS_ETE_SERVAPITOPO
+          str     	    AIOPS_ETE_SERVSTRTOPO
+          sql       	  AIOPS_ETE_SERVSQLTOPO
+          unknown  	    AIOPS_ETE_SERVUNKNOWN
+          */
+
+          // 根据topic判断，处理topic列表中的每一个topic
+          if (topics.equals("AIOPS_ETE_SERVAGENTTOPO")){   // agent     	  AIOPS_ETE_SERVAGENTTOPO
           // 解析JSON
           val resJson = JSON.parseObject(valJson)
           // 获取数据
@@ -311,8 +319,20 @@ object Spark_KafkaTOMySQL_V3 {
           getTime()
           // 将数据存储到MySQL
           MysqlUtil.saveTo_statBean(statBean)
-        }
+        }else if (topics.equals("AIOPS_ETE_SERVUNKNOWN")){  // unknown  	    AIOPS_ETE_SERVUNKNOWN
+          // 解析JSON
+          val resJson = JSON.parseObject(valJson)
+          // 获取数据
 
+          // 将数据写入Bean中
+          val unknownBean = UnknownBean(resJson.toString)
+
+          // 获取当前时间
+          getTime()
+          // 将数据存储到MySQL
+          MysqlUtil.saveTo_unknownBean(unknownBean)
+        }
+        }
       }
     }
     ssc.start()
