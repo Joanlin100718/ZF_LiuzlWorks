@@ -13,6 +13,15 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 import java.text.SimpleDateFormat
 import java.util.Date
 
+
+/*
+*
+*   这个版本的读取数据，需要从头开始遍历，所以耗时较长
+*
+*   这个版本，每次重启会消耗大量的时间
+*
+* */
+
 object Spark_KafkaTOMySQL_V3 {
 
   def main(args: Array[String]): Unit = {
@@ -53,7 +62,7 @@ object Spark_KafkaTOMySQL_V3 {
                       "AIOPS_ETE_SERVUNKNOWN,"   +     // unknown
                       "AIOPS_ETE_SERVSQLTOPO,"       //sql
       ).split(",").toSet
-//    val topicsSet = "AIOPS_ETE_SERVSTRTOPO".split(",").toSet
+//    val topicsSet = "AIOPS_ETE_SERVSQLTOPO".split(",").toSet
 
     // 添加topic配置
     val kafkaParams = Map[String, Object](
@@ -150,7 +159,7 @@ object Spark_KafkaTOMySQL_V3 {
             getTime()
 
             // 将数据存储到MySQL
-            MysqlUtil.saveTo_agentBean(agentBean )
+            MysqlUtil.saveTo_agent(agentBean )
           } else {
 
             val		version		= resJson.getString("version")
@@ -166,7 +175,7 @@ object Spark_KafkaTOMySQL_V3 {
             getTime()
 
             // 将数据存储到MySQL
-            MysqlUtil.saveTo_agentTailBean(agentTailBean )
+            MysqlUtil.saveTo_agentTail(agentTailBean )
           }
         } else if (topics.equals("AIOPS_ETE_SERVSTRTOPO")){ // str    AIOPS_ETE_SERVSTRTOPO
           // 解析JSON
@@ -186,7 +195,7 @@ object Spark_KafkaTOMySQL_V3 {
           getTime()
 
           // 将数据存储到MySQL
-          MysqlUtil.saveTo_strBean(strBean)
+          MysqlUtil.saveTo_str(strBean)
         } else if (topics.equals("AIOPS_ETE_SERVFRAMETOPO")){  //span      	  AIOPS_ETE_SERVFRAMETOPO
           // 解析JSON
           val resJson = JSON.parseObject(valJson)
@@ -226,7 +235,7 @@ object Spark_KafkaTOMySQL_V3 {
           getTime()
 
           // 将数据存储到MySQL
-          MysqlUtil.saveTo_spanBean(spanBean)
+          MysqlUtil.saveTo_span(spanBean)
         } else if (topics.equals("AIOPS_ETE_SERVCHUNKTOPO")){  //spanChunk	    AIOPS_ETE_SERVCHUNKTOPO
           // 解析JSON
           val resJson = JSON.parseObject(valJson)
@@ -247,7 +256,7 @@ object Spark_KafkaTOMySQL_V3 {
           // 获取当前时间
           getTime()
           // 将数据存储到MySQL
-          MysqlUtil.saveTo_spanChuckBean(spanChuckBean)
+          MysqlUtil.saveTo_spanChuck(spanChuckBean)
 
         } else if (topics.equals("AIOPS_ETE_SERVAPITOPO")){  //api      	    AIOPS_ETE_SERVAPITOPO
           // 解析JSON
@@ -273,7 +282,7 @@ object Spark_KafkaTOMySQL_V3 {
           // 获取当前时间
           getTime()
           // 将数据存储到MySQL
-          MysqlUtil.saveTo_apiBean(apikBean)
+          MysqlUtil.saveTo_api(apikBean)
         } else if (topics.equals("AIOPS_ETE_SERVSQLTOPO")){  //sql       	  AIOPS_ETE_SERVSQLTOPO
           // 解析JSON
           val resJson = JSON.parseObject(valJson)
@@ -294,32 +303,8 @@ object Spark_KafkaTOMySQL_V3 {
           // 获取当前时间
           getTime()
           // 将数据存储到MySQL
-          MysqlUtil.saveTo_sqlBean(sqlBean)
-        } else if (topics.equals("AIOPS_ETE_SERVSTATTOPO")){  // stat      AIOPS_ETE_SERVSTATTOPO
-          // 解析JSON
-          println()
-          println(valJson)
-          println()
-          println("啥东西："  + valJson.dropRight(1).drop(1))
-          val resJson = JSON.parseObject(valJson.dropRight(1).drop(1))
-          println(resJson)
-          // 获取数据
-          val	agentId	= resJson.getString("agentId")
-          val	jvmGcBos	= resJson.getString("jvmGcBos")
-          val	jvmGcDetailedBos	= resJson.getString("jvmGcDetailedBos")
-          val	cpuLoadBos	= resJson.getString("cpuLoadBos")
-          val	transactionBos	= resJson.getString("transactionBos")
-          val	activeTraceBos	= resJson.getString("activeTraceBos")
-          val	dataSourceListBos	= resJson.getString("dataSourceListBos")
-
-          // 将数据写入Bean中
-          val statBean = StatBean(agentId,jvmGcBos,jvmGcDetailedBos,cpuLoadBos,transactionBos,activeTraceBos,dataSourceListBos)
-
-          // 获取当前时间
-          getTime()
-          // 将数据存储到MySQL
-          MysqlUtil.saveTo_statBean(statBean)
-        }else if (topics.equals("AIOPS_ETE_SERVUNKNOWN")){  // unknown  	    AIOPS_ETE_SERVUNKNOWN
+          MysqlUtil.saveTo_sql(sqlBean)
+        } else if (topics.equals("AIOPS_ETE_SERVUNKNOWN")){  // unknown  	    AIOPS_ETE_SERVUNKNOWN
           // 解析JSON
           val resJson = JSON.parseObject(valJson)
           // 获取数据
@@ -330,7 +315,7 @@ object Spark_KafkaTOMySQL_V3 {
           // 获取当前时间
           getTime()
           // 将数据存储到MySQL
-          MysqlUtil.saveTo_unknownBean(unknownBean)
+          MysqlUtil.saveTo_unknown(unknownBean)
         }
         }
       }

@@ -123,7 +123,7 @@ object Spark_KafkaTOMySQL_V2 {
               setAgentVersion, setVmVersion, setStartTimestamp, setEndTimestamp, setEndStatus)
             // 将数据存储到MySQL
             println(topics)
-            MysqlUtil.saveTo_agentBean(agentBean )
+            MysqlUtil.saveTo_agent(agentBean )
           } else {
 
             val		version		= resJson.getString("version")
@@ -137,7 +137,7 @@ object Spark_KafkaTOMySQL_V2 {
             // 将数据存储到MySQL
 
             println(topics)
-            MysqlUtil.saveTo_agentTailBean(agentTailBean )
+            MysqlUtil.saveTo_agentTail(agentTailBean )
 
           }
         } else if (topics.contains("AIOPS_ETE_SERVSTRTOPO")){
@@ -156,7 +156,7 @@ object Spark_KafkaTOMySQL_V2 {
 
           println(topic)
           // 将数据存储到MySQL
-          MysqlUtil.saveTo_strBean(strBean)
+          MysqlUtil.saveTo_str(strBean)
         }
 
 

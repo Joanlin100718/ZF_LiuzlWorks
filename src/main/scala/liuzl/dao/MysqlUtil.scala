@@ -1,17 +1,104 @@
 package liuzl.dao
 
 
+import com.alibaba.fastjson.JSON
 import com.mchange.v2.c3p0.ComboPooledDataSource
-import liuzl.pojo.{AgentBean, AgentTailBean, ApiBean, SpanChuckBean, SpanBean, SqlBean, StatBean, StrBean, UnknownBean}
+import liuzl.pojo.{AgentBean, AgentTailBean, ApiBean, SpanBean, SpanChuckBean, SqlBean, StatBean, StrBean, UnknownBean}
 
 import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.ResultSet
+import scala.collection.mutable.ListBuffer
 
 object MysqlUtil {
   
   val c3p0=new ComboPooledDataSource
 
+  /*
+  *   查询对应的offset列表
+  *
+  * */
+  def selectOffsetList (topic:String ) : ListBuffer[Long] ={
+    var conn:Connection=null
+    var ps:PreparedStatement=null
+    var rs:ResultSet=null
+
+    // 创建变长的List 存储数据返回
+    val list = scala.collection.mutable.ListBuffer(1L)
+    list.remove(0)
+
+    try {
+      conn=c3p0.getConnection
+
+      // 查询offset
+      //SQL语句
+      val SQLSentence = "select partition0,partition1,partition2,partition3,partition4,partition5 from historicalOffset where kafkaTopic = \"" + topic  + "\" ;"
+      ps = conn.prepareStatement(SQLSentence)
+      rs = ps.executeQuery()
+
+      while (rs.next()){
+
+        list.append(rs.getInt("partition0").toLong)
+        list.append(rs.getInt("partition1").toLong)
+        list.append(rs.getInt("partition2").toLong)
+        list.append(rs.getInt("partition3").toLong)
+        list.append(rs.getInt("partition4").toLong)
+        list.append(rs.getInt("partition5").toLong)
+
+      }
+      list
+
+    } catch {
+      case t: Throwable => t.printStackTrace() // TODO: handle error
+        list
+    }finally {
+      if(ps!=null)ps.close
+      if(rs!=null)rs.close
+      if(conn!=null)conn.close
+    }
+
+  }
+
+
+  /*
+  * V4版本
+  * 更新数据库中offset值
+  * */
+  def updateKafkaOffset(topic:String, partition : Int, offset:Long) : Unit ={
+    var conn:Connection=null
+    var ps:PreparedStatement=null
+    var rs:ResultSet=null
+
+    try {
+      conn=c3p0.getConnection
+
+      // 更新offset 语句
+      val updateSQL = "update historicalOffset set partition" + partition + "  = ?  where kafkaTopic =  ? "
+
+      ps = conn.prepareStatement( updateSQL )
+      ps.setLong(1, offset)
+      ps.setString(2,topic)
+
+      println("offset更新了")
+
+      ps.executeUpdate()
+
+
+
+    } catch {
+      case t: Throwable => t.printStackTrace() // TODO: handle error
+    }finally {
+      if(ps!=null)ps.close
+      if(rs!=null)rs.close
+      if(conn!=null)conn.close
+    }
+
+  }
+
+  /*
+  *  V3  版本中使用
+  *
+  * */
   def selectAndUpdateOffset(topic:String , offset:Long , partition : Int) : Boolean ={
     var conn:Connection=null
     var ps:PreparedStatement=null
@@ -65,7 +152,7 @@ object MysqlUtil {
   /**
    * 数据存储到对应表中
    */
-  def saveTo_agentBean(agentBean: AgentBean ) = {
+  def saveTo_agent(agentBean: AgentBean ) = {
     var conn:Connection=null
     var ps:PreparedStatement=null
     var rs:ResultSet=null
@@ -116,7 +203,7 @@ object MysqlUtil {
       if(conn!=null)conn.close
     }
   }
-  def saveTo_agentTailBean(agentTailBean: AgentTailBean ) = {
+  def saveTo_agentTail(agentTailBean: AgentTailBean ) = {
     var conn:Connection=null
     var ps:PreparedStatement=null
     var rs:ResultSet=null
@@ -144,7 +231,7 @@ object MysqlUtil {
       if(conn!=null)conn.close
     }
   }
-  def saveTo_strBean( strBean: StrBean ) = {
+  def saveTo_str( strBean: StrBean ) = {
 
     var conn:Connection=null
     var ps:PreparedStatement=null
@@ -176,7 +263,7 @@ object MysqlUtil {
       if(conn!=null)conn.close
     }
   }
-  def saveTo_apiBean( apiBean: ApiBean ) = {
+  def saveTo_api( apiBean: ApiBean ) = {
 
     //     agentBean: AgentBean * ,apiBean: ApiBean , chuckBean: ChuckBean,spanBean: SpanBean,sqlBean: SqlBean,statBean: StatBean,strBean: StrBean
 
@@ -216,7 +303,7 @@ object MysqlUtil {
       if(conn!=null)conn.close
     }
   }
-  def saveTo_spanChuckBean(spanChuckBean: SpanChuckBean ) = {
+  def saveTo_spanChuck(spanChuckBean: SpanChuckBean ) = {
 
     //     agentBean: AgentBean * ,apiBean: ApiBean , chuckBean: ChuckBean,spanBean: SpanBean,sqlBean: SqlBean,statBean: StatBean,strBean: StrBean
 
@@ -252,7 +339,7 @@ object MysqlUtil {
       if(conn!=null)conn.close
     }
   }
-  def saveTo_spanBean(  spanBean: SpanBean ) = {
+  def saveTo_span(  spanBean: SpanBean ) = {
 
     //     agentBean: AgentBean * ,apiBean: ApiBean , chuckBean: ChuckBean,spanBean: SpanBean,sqlBean: SqlBean,statBean: StatBean,strBean: StrBean
 
@@ -307,7 +394,7 @@ object MysqlUtil {
       if(conn!=null)conn.close
     }
   }
-  def saveTo_sqlBean( sqlBean: SqlBean ) = {
+  def saveTo_sql( sqlBean: SqlBean ) = {
 
     //     agentBean: AgentBean * ,apiBean: ApiBean , chuckBean: ChuckBean,spanBean: SpanBean,sqlBean: SqlBean,statBean: StatBean,strBean: StrBean
 
@@ -342,38 +429,83 @@ object MysqlUtil {
       if(conn!=null)conn.close
     }
   }
-  def saveTo_statBean( statBean: StatBean ) = {
+
+
+  /*
+  * 定义 将stat 数据存储到对应的mysql中
+  *
+  * */
+  def saveTo_stat( statBean: StatBean  ) = {
 
     //     agentBean: AgentBean * ,apiBean: ApiBean , chuckBean: ChuckBean,spanBean: SpanBean,sqlBean: SqlBean,statBean: StatBean,strBean: StrBean
 
     var conn:Connection=null
     var ps:PreparedStatement=null
+    var ps1:PreparedStatement=null
+    var ps2:PreparedStatement=null
     var rs:ResultSet=null
 
     try {
       conn=c3p0.getConnection
-      //SQL语句
-      ps=conn.prepareStatement("insert into stat values(?,?,?,?,?,?,?,NOW())")
-      ps.setString( 1  , 	statBean.agentId	)
-      ps.setString( 2  , 	statBean.jvmGcBos	)
-      ps.setString( 3  , 	statBean.jvmGcDetailedBos	)
-      ps.setString( 4  , 	statBean.cpuLoadBos	)
-      ps.setString( 5  , 	statBean.transactionBos	)
-      ps.setString( 6  , 	statBean.activeTraceBos	)
-      ps.setString( 7  , 	statBean.dataSourceListBos	)
 
-      println("************************存一个*************************")
-      println()
-      ps.executeUpdate()
+      var res:Boolean = true
+
+      val	timeStamp = statBean.timestamp
+
+      // 定义获取对应字段
+      val field = statBean.field
+
+
+      // 定义查询语句
+      val SQLSentence = "select first_timestamp from stat order by first_timestamp ASC ; "
+      ps = conn.prepareStatement(SQLSentence)
+      rs = ps.executeQuery()
+
+      while (rs.next()) {
+
+        // 根据下标获取对应的
+        val first_timestamp = rs.getString("first_timestamp")
+
+        if (timeStamp.equals(first_timestamp)) {
+
+          // 更新语句
+          val updateSQL = "update stat set " + field   + "='" + statBean.statValues + "' where first_timestamp =  ? "
+          ps1 = conn.prepareStatement( updateSQL )
+          ps1.setString(1,timeStamp)
+          ps1.executeUpdate()
+
+          res = false
+
+        }
+      }
+      if (res){
+        // 插入语句
+        val insertSQL = "insert into `stat` (" +  field  + ",first_timestamp,importDate) values (?,?,NOW())"
+
+        ps2 = conn.prepareStatement(insertSQL)
+        ps2.setString( 1  ,	statBean.statValues )
+        ps2.setString( 2  ,	timeStamp	 )
+
+        println("************************存一个*************************")
+        println()
+        ps2.executeUpdate()
+      }
+
     } catch {
       case t: Throwable => t.printStackTrace() // TODO: handle error
+
     }finally {
       if(ps!=null)ps.close
+      if(ps1!=null)ps.close
+      if(ps2!=null)ps.close
       if(rs!=null)rs.close
       if(conn!=null)conn.close
     }
   }
-  def saveTo_unknownBean(  unknownBean: UnknownBean ): Unit = {
+
+
+
+  def saveTo_unknown(  unknownBean: UnknownBean ): Unit = {
 
     //     agentBean: AgentBean * ,apiBean: ApiBean , chuckBean: ChuckBean,spanBean: SpanBean,sqlBean: SqlBean,statBean: StatBean,strBean: StrBean
 
