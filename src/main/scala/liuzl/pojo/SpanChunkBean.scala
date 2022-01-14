@@ -1,6 +1,6 @@
 package liuzl.pojo
 
-case class SpanChuckBean(
+case class SpanChunkBean(
                       version	:String,
                       agentId	:String,
                       applicationId	:String,

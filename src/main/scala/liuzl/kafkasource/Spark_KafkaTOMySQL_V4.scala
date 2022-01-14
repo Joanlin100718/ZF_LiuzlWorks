@@ -6,7 +6,7 @@ import kafka.message.MessageAndMetadata
 import kafka.serializer.StringDecoder
 import liuzl.dao.MysqlUtil
 import liuzl.kafkasource.Spark_KafkaTOMySQL_STAT.getTime
-import liuzl.pojo.{AgentBean, AgentTailBean, ApiBean, SpanBean, SpanChuckBean, SqlBean, StatBean, StrBean, UnknownBean}
+import liuzl.pojo.{AgentBean, AgentTailBean, ApiBean, SpanBean, SpanChunkBean, SqlBean, StatBean, StrBean, UnknownBean}
 import org.apache.spark.{SparkConf, TaskContext}
 import org.apache.spark.streaming.dstream.InputDStream
 import org.apache.spark.streaming.kafka.{HasOffsetRanges, KafkaUtils, OffsetRange}
@@ -108,11 +108,10 @@ object Spark_KafkaTOMySQL_V4 {
 
         println("Topic: " + getTopic(topic) + "\tPartition: " + partition + "\tOffset: " + offset)
         println(valJson)
-        // 更新数据库中的offset
-        MysqlUtil.updateKafkaOffset(topic,partition,offset)
-
         // 存储数据
         saveKafkaData(topic , valJson)
+        // 更新数据库中的offset
+        MysqlUtil.updateKafkaOffset(topic,partition,offset)
 
       }
     }
@@ -267,12 +266,12 @@ object Spark_KafkaTOMySQL_V4 {
       val	applicationServiceType	= resJson.getString("applicationServiceType")
       val	spanEventBoList	= resJson.getString("spanEventBoList")
 
-      val spanChuckBean = SpanChuckBean(version,agentId,applicationId,agentStartTime,transactionId,spanId,endPoint,serviceType,applicationServiceType,spanEventBoList)
+      val spanChuckBean = SpanChunkBean(version,agentId,applicationId,agentStartTime,transactionId,spanId,endPoint,serviceType,applicationServiceType,spanEventBoList)
 
       // 获取当前时间
       getTime()
       // 将数据存储到MySQL
-      MysqlUtil.saveTo_spanChuck(spanChuckBean)
+      MysqlUtil.saveTo_spanChunk(spanChuckBean)
 
     } else if (topics.equals("AIOPS_ETE_SERVAPITOPO")){  //api      	    AIOPS_ETE_SERVAPITOPO
       // 解析JSON
@@ -321,12 +320,9 @@ object Spark_KafkaTOMySQL_V4 {
       // 将数据存储到MySQL
       MysqlUtil.saveTo_sql(sqlBean)
     } else if (topics.equals("AIOPS_ETE_SERVUNKNOWN")){  // unknown  	    AIOPS_ETE_SERVUNKNOWN
-      // 解析JSON
-      val resJson = JSON.parseObject(valJson)
-      // 获取数据
 
       // 将数据写入Bean中
-      val unknownBean = UnknownBean(resJson.toString)
+      val unknownBean = UnknownBean(valJson)
 
       // 获取当前时间
       getTime()

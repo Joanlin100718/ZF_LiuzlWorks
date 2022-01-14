@@ -3,7 +3,7 @@ package liuzl.dao
 
 import com.alibaba.fastjson.JSON
 import com.mchange.v2.c3p0.ComboPooledDataSource
-import liuzl.pojo.{AgentBean, AgentTailBean, ApiBean, SpanBean, SpanChuckBean, SqlBean, StatBean, StrBean, UnknownBean}
+import liuzl.pojo.{AgentBean, AgentTailBean, ApiBean, SpanBean, SpanChunkBean, SqlBean, StatBean, StrBean, UnknownBean}
 
 import java.sql.Connection
 import java.sql.PreparedStatement
@@ -265,7 +265,7 @@ object MysqlUtil {
   }
   def saveTo_api( apiBean: ApiBean ) = {
 
-    //     agentBean: AgentBean * ,apiBean: ApiBean , chuckBean: ChuckBean,spanBean: SpanBean,sqlBean: SqlBean,statBean: StatBean,strBean: StrBean
+    //     agentBean: AgentBean * ,apiBean: ApiBean , ChunkBean: ChunkBean,spanBean: SpanBean,sqlBean: SqlBean,statBean: StatBean,strBean: StrBean
 
     var conn:Connection=null
     var ps:PreparedStatement=null
@@ -303,9 +303,9 @@ object MysqlUtil {
       if(conn!=null)conn.close
     }
   }
-  def saveTo_spanChuck(spanChuckBean: SpanChuckBean ) = {
+  def saveTo_spanChunk(spanChunkBean: SpanChunkBean ) = {
 
-    //     agentBean: AgentBean * ,apiBean: ApiBean , chuckBean: ChuckBean,spanBean: SpanBean,sqlBean: SqlBean,statBean: StatBean,strBean: StrBean
+    //     agentBean: AgentBean * ,apiBean: ApiBean , ChunkBean: ChunkBean,spanBean: SpanBean,sqlBean: SqlBean,statBean: StatBean,strBean: StrBean
 
     var conn:Connection=null
     var ps:PreparedStatement=null
@@ -314,17 +314,17 @@ object MysqlUtil {
     try {
       conn=c3p0.getConnection
       //
-      ps=conn.prepareStatement("insert into spanChuck values(?,?,?,?,?,?,?,?,?,?,NOW())")
-      ps.setString(1,	spanChuckBean.version	)
-      ps.setString(2,	spanChuckBean.agentId	)
-      ps.setString(3,	spanChuckBean.applicationId	)
-      ps.setString(4,	spanChuckBean.agentStartTime	)
-      ps.setString(5,	spanChuckBean.transactionId	)
-      ps.setString(6,	spanChuckBean.spanId	)
-      ps.setString(7,	spanChuckBean.endPoint	)
-      ps.setString(8,	spanChuckBean.serviceType	)
-      ps.setString(9,	spanChuckBean.applicationServiceType	)
-      ps.setString(10,	spanChuckBean.spanEventBoList	)
+      ps=conn.prepareStatement("insert into spanChunk values(?,?,?,?,?,?,?,?,?,?,NOW())")
+      ps.setString(1,	spanChunkBean.version	)
+      ps.setString(2,	spanChunkBean.agentId	)
+      ps.setString(3,	spanChunkBean.applicationId	)
+      ps.setString(4,	spanChunkBean.agentStartTime	)
+      ps.setString(5,	spanChunkBean.transactionId	)
+      ps.setString(6,	spanChunkBean.spanId	)
+      ps.setString(7,	spanChunkBean.endPoint	)
+      ps.setString(8,	spanChunkBean.serviceType	)
+      ps.setString(9,	spanChunkBean.applicationServiceType	)
+      ps.setString(10,	spanChunkBean.spanEventBoList	)
 
       println("************************存一个*************************")
       println()
@@ -341,7 +341,7 @@ object MysqlUtil {
   }
   def saveTo_span(  spanBean: SpanBean ) = {
 
-    //     agentBean: AgentBean * ,apiBean: ApiBean , chuckBean: ChuckBean,spanBean: SpanBean,sqlBean: SqlBean,statBean: StatBean,strBean: StrBean
+    //     agentBean: AgentBean * ,apiBean: ApiBean , ChunkBean: ChunkBean,spanBean: SpanBean,sqlBean: SqlBean,statBean: StatBean,strBean: StrBean
 
     var conn:Connection=null
     var ps:PreparedStatement=null
@@ -396,7 +396,7 @@ object MysqlUtil {
   }
   def saveTo_sql( sqlBean: SqlBean ) = {
 
-    //     agentBean: AgentBean * ,apiBean: ApiBean , chuckBean: ChuckBean,spanBean: SpanBean,sqlBean: SqlBean,statBean: StatBean,strBean: StrBean
+    //     agentBean: AgentBean * ,apiBean: ApiBean , ChunkBean: ChunkBean,spanBean: SpanBean,sqlBean: SqlBean,statBean: StatBean,strBean: StrBean
 
     var conn:Connection=null
     var ps:PreparedStatement=null
@@ -437,7 +437,7 @@ object MysqlUtil {
   * */
   def saveTo_stat( statBean: StatBean  ) = {
 
-    //     agentBean: AgentBean * ,apiBean: ApiBean , chuckBean: ChuckBean,spanBean: SpanBean,sqlBean: SqlBean,statBean: StatBean,strBean: StrBean
+    //     agentBean: AgentBean * ,apiBean: ApiBean , ChunkBean: ChunkBean,spanBean: SpanBean,sqlBean: SqlBean,statBean: StatBean,strBean: StrBean
 
     var conn:Connection=null
     var ps:PreparedStatement=null
@@ -507,7 +507,7 @@ object MysqlUtil {
 
   def saveTo_unknown(  unknownBean: UnknownBean ): Unit = {
 
-    //     agentBean: AgentBean * ,apiBean: ApiBean , chuckBean: ChuckBean,spanBean: SpanBean,sqlBean: SqlBean,statBean: StatBean,strBean: StrBean
+    //     agentBean: AgentBean * ,apiBean: ApiBean , ChunkBean: ChunkBean,spanBean: SpanBean,sqlBean: SqlBean,statBean: StatBean,strBean: StrBean
 
     var conn:Connection=null
     var ps:PreparedStatement=null

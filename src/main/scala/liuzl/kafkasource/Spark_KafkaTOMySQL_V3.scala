@@ -251,12 +251,12 @@ object Spark_KafkaTOMySQL_V3 {
           val	applicationServiceType	= resJson.getString("applicationServiceType")
           val	spanEventBoList	= resJson.getString("spanEventBoList")
 
-          val spanChuckBean = SpanChuckBean(version,agentId,applicationId,agentStartTime,transactionId,spanId,endPoint,serviceType,applicationServiceType,spanEventBoList)
+          val spanChuckBean = SpanChunkBean(version,agentId,applicationId,agentStartTime,transactionId,spanId,endPoint,serviceType,applicationServiceType,spanEventBoList)
 
           // 获取当前时间
           getTime()
           // 将数据存储到MySQL
-          MysqlUtil.saveTo_spanChuck(spanChuckBean)
+          MysqlUtil.saveTo_spanChunk(spanChuckBean)
 
         } else if (topics.equals("AIOPS_ETE_SERVAPITOPO")){  //api      	    AIOPS_ETE_SERVAPITOPO
           // 解析JSON

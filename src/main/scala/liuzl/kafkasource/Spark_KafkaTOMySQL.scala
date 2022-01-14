@@ -104,7 +104,7 @@ object Spark_KafkaTOMySQL {
           val strBean = StrBean(agentId,agentStartTime,stringId,stringValue,setAgentId,setAgentStartTime,setStringId,setStringValue)
 
           // 将数据存储到MySQL
-          MysqlUtil.saveTo_strBean(strBean)
+          MysqlUtil.saveTo_str(strBean)
 
 /*          // 获取Json数据中的对应值
           val		hostname		= resJson.getString("hostname")
