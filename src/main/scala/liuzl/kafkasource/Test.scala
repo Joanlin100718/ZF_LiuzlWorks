@@ -6,13 +6,29 @@ import liuzl.dao.MysqlUtil
 object Test {
   def main(args: Array[String]): Unit = {
 
-    val str = "({\"agentId\":\"192.168.165.199-9999\",\"startTimestamp\":1642059748664,\"timestamp\":1642060478824,\"directCount\":170,\"directMemoryUsed\":2977697,\"mappedCount\":0,\"mappedMemoryUsed\":0,\"agentStatType\":\"DIRECT_BUFFER\"},{\"agentId\":\"192.168.165.199-9999\",\"startTimestamp\":1642059748664,\"timestamp\":1642060483824,\"directCount\":170,\"directMemoryUsed\":2977697,\"mappedCount\":0,\"mappedMemoryUsed\":0,\"agentStatType\":\"DIRECT_BUFFER\"},{\"agentId\":\"192.168.165.199-9999\",\"startTimestamp\":1642059748664,\"timestamp\":1642060488824,\"directCount\":170,\"directMemoryUsed\":2977697,\"mappedCount\":0,\"mappedMemoryUsed\":0,\"agentStatType\":\"DIRECT_BUFFER\"},{\"agentId\":\"192.168.165.199-9999\",\"startTimestamp\":1642059748664,\"timestamp\":1642060493824,\"directCount\":170,\"directMemoryUsed\":2977697,\"mappedCount\":0,\"mappedMemoryUsed\":0,\"agentStatType\":\"DIRECT_BUFFER\"},{\"agentId\":\"192.168.165.199-9999\",\"startTimestamp\":1642059748664,\"timestamp\":1642060498824,\"directCount\":170,\"directMemoryUsed\":2977697,\"mappedCount\":0,\"mappedMemoryUsed\":0,\"agentStatType\":\"DIRECT_BUFFER\"},{\"agentId\":\"192.168.165.199-9999\",\"startTimestamp\":1642059748664,\"timestamp\":1642060503824,\"directCount\":170,\"directMemoryUsed\":2977697,\"mappedCount\":0,\"mappedMemoryUsed\":0,\"agentStatType\":\"DIRECT_BUFFER\"})"
+
+    val list = scala.collection.mutable.ListBuffer(1,2,3,4,5,6,7,8,9)
 
 
-    val i = str.indexOf("timestamp")
-    // 77
-    println(str.take(i + 24).takeRight(13))
-    println(str.indexOf("timestamp"))
+    for (i <- list){
+      println(i)
+      println(list(0))
+    }
+
+    var str ="qweqweqweq"
+    println(str.concat("12313213"))
+
+    val a = null
+    println(Option(a).toString)
+
+
+//    val str = "({\"agentId\":\"192.168.165.199-9999\",\"startTimestamp\":1642059748664,\"timestamp\":1642060478824,\"directCount\":170,\"directMemoryUsed\":2977697,\"mappedCount\":0,\"mappedMemoryUsed\":0,\"agentStatType\":\"DIRECT_BUFFER\"},{\"agentId\":\"192.168.165.199-9999\",\"startTimestamp\":1642059748664,\"timestamp\":1642060483824,\"directCount\":170,\"directMemoryUsed\":2977697,\"mappedCount\":0,\"mappedMemoryUsed\":0,\"agentStatType\":\"DIRECT_BUFFER\"},{\"agentId\":\"192.168.165.199-9999\",\"startTimestamp\":1642059748664,\"timestamp\":1642060488824,\"directCount\":170,\"directMemoryUsed\":2977697,\"mappedCount\":0,\"mappedMemoryUsed\":0,\"agentStatType\":\"DIRECT_BUFFER\"},{\"agentId\":\"192.168.165.199-9999\",\"startTimestamp\":1642059748664,\"timestamp\":1642060493824,\"directCount\":170,\"directMemoryUsed\":2977697,\"mappedCount\":0,\"mappedMemoryUsed\":0,\"agentStatType\":\"DIRECT_BUFFER\"},{\"agentId\":\"192.168.165.199-9999\",\"startTimestamp\":1642059748664,\"timestamp\":1642060498824,\"directCount\":170,\"directMemoryUsed\":2977697,\"mappedCount\":0,\"mappedMemoryUsed\":0,\"agentStatType\":\"DIRECT_BUFFER\"},{\"agentId\":\"192.168.165.199-9999\",\"startTimestamp\":1642059748664,\"timestamp\":1642060503824,\"directCount\":170,\"directMemoryUsed\":2977697,\"mappedCount\":0,\"mappedMemoryUsed\":0,\"agentStatType\":\"DIRECT_BUFFER\"})"
+//
+//
+//    val i = str.indexOf("timestamp")
+//    // 77
+//    println(str.take(i + 24).takeRight(13))
+//    println(str.indexOf("timestamp"))
 
 
 
