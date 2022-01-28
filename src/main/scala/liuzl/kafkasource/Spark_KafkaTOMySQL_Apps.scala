@@ -4,9 +4,8 @@ import com.alibaba.fastjson.JSON
 import kafka.common.TopicAndPartition
 import kafka.message.MessageAndMetadata
 import kafka.serializer.StringDecoder
-import liuzl.dao.{MysqlUtil, MysqlUtil_User}
-import liuzl.kafkasource.Spark_KafkaTOMySQL_V4.getTime
-import liuzl.pojo._
+import liuzl.dao.{MysqlUtil, MysqlUtil_Apps}
+import liuzl.pojo.{ApplicationUsageBean, _}
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.dstream.InputDStream
 import org.apache.spark.streaming.kafka.KafkaUtils
@@ -22,18 +21,18 @@ import java.util.Date
 * */
 
 
-object Spark_KafkaTOMySQL_OnlyUser {
+object Spark_KafkaTOMySQL_Apps {
   def main(args: Array[String]): Unit = {
 
     // 定义kafka集群配置信息
-    val brokers = "192.168.165.203:9092"
+    val brokers = "192.168.165.181:8422,192.168.165.180:8422,192.168.165.179:8422"
 
     // 定义topics列表
     val topics =
-                "sys_user_add,"  +
-                "sys_user_del,"  +
-                "sys_user_update,"  +
-                "user"
+                "application_duration,"  +
+                "application_traffic_usage,"  +
+                "application_usage"
+
 
     // 定义时间间隔，（默认为5秒）
     val split_rdd_time = 8
@@ -41,7 +40,7 @@ object Spark_KafkaTOMySQL_OnlyUser {
 
     val sparkConf = new SparkConf()
       .setAppName("SendSampleKafkaDataToApple")
-      .setMaster("local")
+      .setMaster("local[*]")
       .set("spark.app.id", "streaming_kafka")
 
     // 定义SparkStreamingContext
@@ -54,9 +53,7 @@ object Spark_KafkaTOMySQL_OnlyUser {
 //    ssc.checkpoint("D://checkpoint")
 
     // 创建包含brokers和topic的直接kafka流
-    val topicsSet: Set[String] = topics.split(",").toSet
-
-
+//    val topicsSet: Set[String] = topics.split(",").toSet
 
     // kafka 配置参数
     val kafkaParams: Map[String, String] = Map[String, String](
@@ -74,13 +71,12 @@ object Spark_KafkaTOMySQL_OnlyUser {
      *      指定了开始的offset后，将会从上一次Streaming程序停止处，开始读取kafka数据
      */
 
-//    val offsetList = List(("sys_user_del", 0,0L),("sys_user_add", 0, 0L),("sys_user_update", 0, 0L),("user", 0, 0L))                          //指定topic，partition_no，offset
+//    val offsetList = List(("AIOPS_ETE_SERVSTRTOPO", 1, 24L),("AIOPS_ETE_SERVSTRTOPO", 2, 25L),("AIOPS_ETE_SERVSQLTOPO", 0, 28L),("AIOPS_ETE_SERVSQLTOPO", 1, 29L))                          //指定topic，partition_no，offset
 
     // 根据定义的topics列表，构建Map参数
     val fromOffsets = setFromOffsets(topics)     //构建参数
 
     println(fromOffsets)
-
     // 构建返回数据的参数
     val messageHandler = (mam: MessageAndMetadata[String, String]) => ( mam.topic, mam.partition , mam.offset, mam.message()) //构建MessageAndMetadata
 
@@ -105,90 +101,107 @@ object Spark_KafkaTOMySQL_OnlyUser {
         val offset    = line._3        // 获取对应的offset
         val valJson   = line._4        // 获取每一行中的value值
 
-//        println("Topic: " + topic + "\tPartition: " + partition + "\tOffset: " + offset)
-//        println(valJson)
-
-        val trueOrFalse = false
+        println("Topic: " + topic + "\tPartition: " + partition + "\tOffset: " + offset)
+        println(valJson)
         // 存储数据
-        val resultTrueOrFalse  = saveKafkaData(topic , valJson ,trueOrFalse)
-        if (resultTrueOrFalse) {
-          // 更新数据库中的offset
-          MysqlUtil_User.updateKafkaOffset(topic,partition,offset)
-        }
-//        println("***************************下一波开始了******************************")
-//        println()
+        saveKafkaData(topic , valJson)
+        // 更新数据库中的offset
+        MysqlUtil_Apps.updateKafkaOffset(topic,partition,offset)
+
       }
     }
     ssc.start()
     ssc.awaitTermination()
   }
 
-  def saveKafkaData(topics:String, valJson:String ,trueOrFalse : Boolean ):Boolean = {
 
-    var TOF = trueOrFalse ;
 
-    if (topics.equals("sys_user_add")){   // sys_user_add
+
+  /*
+  *  对Kafka中的数据进行存储函数
+  *
+  * */
+  def saveKafkaData(topics:String, valJson:String ) = {
+
+    if (topics.equals("application_usage")) { // 应用使用情况
       // 解析JSON
       val resJson = JSON.parseObject(valJson)
       // 获取数据
-      val	userId      	=	resJson.getString("userId")
-      val	userName    	=	resJson.getString("userName")
-      val	admin       	=	resJson.getBoolean("admin")
-      val	mobile      	=	resJson.getString("mobile")
-      val	nickName    	=	resJson.getString("nickName")
-      val	params      	=	resJson.getString("params")
-      val	password    	=	resJson.getString("password")
-      val	phonenumber 	=	resJson.getString("phonenumber")
-      val	userType    	=	resJson.getString("userType")
 
+      val	employee_id	= resJson.getString("employee_id")
+      val	full_name	= resJson.getString("full_name")
+      val	phone_num	= resJson.getString("phone_num")
+      val	device_id	= resJson.getString("device_id")
+      val	package_name	= resJson.getString("package_name")
+      val	app_name	= resJson.getString("app_name")
+      val	wifi_flow	= resJson.getString("wifi_flow")
+      val	mobile_flow	= resJson.getString("mobile_flow")
+      val	tenant_id	= resJson.getString("tenant_id")
+      val	collect_date	= resJson.getString("collect_date")
+      val	upload_time	= resJson.getString("upload_time")
+      val	create_time	= resJson.getString("create_time")
 
       // 写入Bean中
-      val userBean = UserBean(userId, userName, admin, mobile, nickName, params, password, phonenumber,userType)
+      val applicationTrafficUsageBean = ApplicationTrafficUsageBean(employee_id,full_name,phone_num,device_id,package_name,app_name,wifi_flow,mobile_flow,tenant_id,collect_date,upload_time,create_time)
 
       // 获取当前时间
-//      getTime()
+      getTime()
 
       // 将数据存储到MySQL
-      MysqlUtil_User.saveTo_Jq_Register( userBean )
-
-      TOF = true
-    } else if (topics.equals("sys_user_del")){   // sys_user_del
-
-      // 对数据进行处理，得到userId
-      val delUserId =  valJson.drop(1).dropRight(1)
-
-      // 获取当前时间
-//      getTime()
-      // 删除用户信息
-      MysqlUtil_User.deleteTo_Jq_Register( delUserId )
-      TOF = true
-    } else if (topics.equals("sys_user_update")){   // sys_user_add
+      MysqlUtil_Apps.saveTo_application_traffic_usage(applicationTrafficUsageBean)
+    } else if (topics.equals("application_traffic_usage")) { // 流量统计
       // 解析JSON
       val resJson = JSON.parseObject(valJson)
       // 获取数据
-      val	userId      	=	resJson.getString("userId")
-      val	userName    	=	resJson.getString("userName")
-      val	admin       	=	resJson.getBoolean("admin")
-      val	mobile      	=	resJson.getString("mobile")
-      val	nickName    	=	resJson.getString("nickName")
-      val	params      	=	resJson.getString("params")
-      val	password    	=	resJson.getString("password")
-      val	phonenumber 	=	resJson.getString("phonenumber")
-      val	userType    	=	resJson.getString("userType")
+
+      val	employee_id	= resJson.getString("employee_id")
+      val	full_name	= resJson.getString("full_name")
+      val	phone_num	= resJson.getString("phone_num")
+      val	device_id	= resJson.getString("device_id")
+      val	package_name	= resJson.getString("package_name")
+      val	app_name	= resJson.getString("app_name")
+      val	wifi_flow	= resJson.getString("wifi_flow")
+      val	mobile_flow	= resJson.getString("mobile_flow")
+      val	tenant_id	= resJson.getString("tenant_id")
+      val	collect_date	= resJson.getString("collect_date")
+      val	upload_time	= resJson.getString("upload_time")
+      val	create_time	= resJson.getString("create_time")
+
+      // 写入Bean中
+      val applicationTrafficUsageBean = ApplicationTrafficUsageBean(employee_id,full_name,phone_num,device_id,package_name,app_name,wifi_flow,mobile_flow,tenant_id,collect_date,upload_time,create_time)
+
+      // 获取当前时间
+      getTime()
+
+      // 将数据存储到MySQL
+      MysqlUtil_Apps.saveTo_application_traffic_usage(applicationTrafficUsageBean)
+    } else if (topics.equals("application_duration")) { // 使用时长
+      // 解析JSON
+      val resJson = JSON.parseObject(valJson)
+      // 获取数据
+
+      val	employee_id	= resJson.getString("employee_id")
+      val	package_name	= resJson.getString("package_name")
+      val	app_name	= resJson.getString("app_name")
+      val	use_duration	= resJson.getString("use_duration")
+      val	wifi_flow	= resJson.getString("wifi_flow")
+      val	mobile_flow	= resJson.getString("mobile_flow")
+      val	install_count	= resJson.getString("install_count")
+      val	tenant_id	= resJson.getString("tenant_id")
+      val	collect_date	= resJson.getString("collect_date")
+      val	create_time	= resJson.getString("create_time")
 
 
       // 写入Bean中
-      val userBean = UserBean(userId, userName, admin, mobile, nickName, params, password, phonenumber ,userType)
+      println(collect_date)
+      val applicationDurationBean = ApplicationDurationBean(employee_id,package_name,app_name,use_duration,wifi_flow,mobile_flow,install_count,tenant_id,collect_date,create_time)
 
       // 获取当前时间
-//      getTime()
+      getTime()
 
       // 将数据存储到MySQL
-      MysqlUtil_User.updateTo_Jq_Register( userBean )
-
-      TOF = true
+      MysqlUtil_Apps.saveTo_application_duration(applicationDurationBean)
     }
-    TOF
   }
 
   /*
@@ -199,7 +212,6 @@ object Spark_KafkaTOMySQL_OnlyUser {
     val df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
     println(df.format(new Date()))
   }
-
 
 
   /*
@@ -217,7 +229,7 @@ object Spark_KafkaTOMySQL_OnlyUser {
     for (topic <- topicLists){
 
       // 获取各个partition对应的offset
-      val lists = MysqlUtil_User.selectOffsetList(topic)
+      val lists = MysqlUtil_Apps.selectOffsetList(topic)
 
       // 定义数据下标
       var index = 0
@@ -227,15 +239,7 @@ object Spark_KafkaTOMySQL_OnlyUser {
 
         // 定义返回Map值
         val tp = TopicAndPartition(topic,index)
-
-        var offset = 0L
-
-        // 获取offset偏移量
-        if (list == 0) {
-          offset = list
-        } else {
-          offset = list + 1
-        }
+        val offset = list + 1
         index += 1
 
         fromOffsets+= (tp -> offset)

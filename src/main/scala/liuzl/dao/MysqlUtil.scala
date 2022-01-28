@@ -79,7 +79,7 @@ object MysqlUtil {
       ps.setLong(1, offset)
       ps.setString(2,topic)
 
-      println("offset更新了")
+//      println("offset更新了")
 
       ps.executeUpdate()
 
@@ -190,8 +190,8 @@ object MysqlUtil {
       ps.setString( 28  ,	agentBean.setEndStatus	)
       ps.setString( 29  ,	agentBean.container)
 
-      println("************************存一个*************************")
-      println()
+//      println("************************存一个*************************")
+//      println()
       ps.executeUpdate()
 
 
@@ -218,8 +218,8 @@ object MysqlUtil {
       ps.setString( 5  ,	agentTailBean.eventIdentifier	)
       ps.setString( 6  ,	agentTailBean.agentLifeCycleState	)
 
-      println("************************存一个*************************")
-      println()
+//      println("************************存一个*************************")
+//      println()
       ps.executeUpdate()
 
 
@@ -250,8 +250,8 @@ object MysqlUtil {
       ps.setString(	7	, strBean.setStringId	)
       ps.setString(	8	, strBean.setStringValue	)
 
-      println("************************存一个*************************")
-      println()
+//      println("************************存一个*************************")
+//      println()
       ps.executeUpdate()
 
 
@@ -290,8 +290,8 @@ object MysqlUtil {
       ps.setString( 13 ,	apiBean.setApiInfo	)
 
 
-      println("************************存一个*************************")
-      println()
+//      println("************************存一个*************************")
+//      println()
       ps.executeUpdate()
 
 
@@ -326,8 +326,8 @@ object MysqlUtil {
       ps.setString(9,	spanChunkBean.applicationServiceType	)
       ps.setString(10,	spanChunkBean.spanEventBoList	)
 
-      println("************************存一个*************************")
-      println()
+//      println("************************存一个*************************")
+//      println()
       ps.executeUpdate()
 
 
@@ -381,8 +381,8 @@ object MysqlUtil {
       ps.setString( 28  , spanBean.root)
       ps.setString( 29  , spanBean.rawVersion)
 
-      println("************************存一个*************************")
-      println()
+//      println("************************存一个*************************")
+//      println()
       ps.executeUpdate()
 
 
@@ -416,8 +416,8 @@ object MysqlUtil {
       ps.setString( 8  ,	sqlBean.setSqlId	)
       ps.setString( 9  ,	sqlBean.setSql	)
 
-      println("************************存一个*************************")
-      println()
+//      println("************************存一个*************************")
+//      println()
       ps.executeUpdate()
 
 
@@ -486,8 +486,8 @@ object MysqlUtil {
         ps2.setString( 1  ,	statBean.statValues )
         ps2.setString( 2  ,	timeStamp	 )
 
-        println("************************存一个*************************")
-        println()
+//        println("************************存一个*************************")
+//        println()
         ps2.executeUpdate()
       }
 
@@ -519,8 +519,8 @@ object MysqlUtil {
       ps=conn.prepareStatement("insert into `unknown` values(?,NOW())")
       ps.setString(	1	, unknownBean.values	)
 
-      println("************************存一个*************************")
-      println()
+//      println("************************存一个*************************")
+//      println()
       ps.executeUpdate()
 
 

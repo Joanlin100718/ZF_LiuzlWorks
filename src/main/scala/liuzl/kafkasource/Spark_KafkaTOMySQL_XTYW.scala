@@ -5,10 +5,10 @@ import kafka.common.TopicAndPartition
 import kafka.message.MessageAndMetadata
 import kafka.serializer.StringDecoder
 import liuzl.dao.MysqlUtil
-import liuzl.pojo.{AgentBean, AgentTailBean, ApiBean, SpanBean, SpanChunkBean, SqlBean, StatBean, StrBean, UnknownBean}
-import org.apache.spark.{SparkConf, TaskContext}
+import liuzl.pojo._
+import org.apache.spark.SparkConf
 import org.apache.spark.streaming.dstream.InputDStream
-import org.apache.spark.streaming.kafka.{HasOffsetRanges, KafkaUtils, OffsetRange}
+import org.apache.spark.streaming.kafka.KafkaUtils
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 import java.text.SimpleDateFormat
@@ -21,8 +21,7 @@ import java.util.Date
 * */
 
 
-
-object Spark_KafkaTOMySQL_V4 {
+object Spark_KafkaTOMySQL_XTYW {
   def main(args: Array[String]): Unit = {
 
     // 定义kafka集群配置信息
@@ -30,14 +29,14 @@ object Spark_KafkaTOMySQL_V4 {
 
     // 定义topics列表
     val topics =
-//                "AIOPS_ETE_SERVFRAMETOPO,"  +  //span
-//                "AIOPS_ETE_SERVCHUNKTOPO,"  +   //spanChunk
-//                "AIOPS_ETE_SERVAGENTTOPO," +    //agent
-//                "AIOPS_ETE_SERVAPITOPO," +     //api
-//                "AIOPS_ETE_SERVSTRTOPO,"  +     //str
-//                "AIOPS_ETE_SERVUNKNOWN,"   +     // unknown
-//                "AIOPS_ETE_SERVSQLTOPO,"   +   //sql
-                "AIOPS_ETE_SERVSTATTOPO"     //stat
+                "AIOPS_ETE_SERVFRAMETOPO,"  +  //span
+                "AIOPS_ETE_SERVCHUNKTOPO,"  +   //spanChunk
+                "AIOPS_ETE_SERVAGENTTOPO," +    //agent
+                "AIOPS_ETE_SERVAPITOPO," +     //api
+                "AIOPS_ETE_SERVSTRTOPO,"  +     //str
+                "AIOPS_ETE_SERVUNKNOWN,"   +     // unknown
+                "AIOPS_ETE_SERVSQLTOPO"      //sql
+//                "AIOPS_ETE_SERVSTATTOPO"     //stat
 
     // 定义时间间隔，（默认为5秒）
     val split_rdd_time = 8
@@ -45,14 +44,16 @@ object Spark_KafkaTOMySQL_V4 {
 
     val sparkConf = new SparkConf()
       .setAppName("SendSampleKafkaDataToApple")
-      .setMaster("local[*]")
+      .setMaster("local")
       .set("spark.app.id", "streaming_kafka")
+//      .set("mapreduce.output.fileoutputformat.outputdir", "/data01/SparkJar/tmp")
 
     // 定义SparkStreamingContext
     val ssc = new StreamingContext(sparkConf, Seconds(split_rdd_time))
 
     // 定义警告级别
     ssc.sparkContext.setLogLevel("WARN")
+
 
     // 定义检查点
 //    ssc.checkpoint("D://checkpoint")
@@ -105,8 +106,8 @@ object Spark_KafkaTOMySQL_V4 {
         val offset    = line._3        // 获取对应的offset
         val valJson   = line._4        // 获取每一行中的value值
 
-        println("Topic: " + getTopic(topic) + "\tPartition: " + partition + "\tOffset: " + offset)
-        println(valJson)
+//        println("Topic: " + getTopic(topic) + "\tPartition: " + partition + "\tOffset: " + offset)
+//        println(valJson)
         // 存储数据
         saveKafkaData(topic , valJson)
         // 更新数据库中的offset
@@ -170,7 +171,7 @@ object Spark_KafkaTOMySQL_V4 {
           setAgentVersion, setVmVersion, setStartTimestamp, setEndTimestamp, setEndStatus)
 
         // 获取当前时间
-        getTime()
+//        getTime()
 
         // 将数据存储到MySQL
         MysqlUtil.saveTo_agent(agentBean )
@@ -206,7 +207,7 @@ object Spark_KafkaTOMySQL_V4 {
       val strBean = StrBean(agentId, startTime, stringId, stringValue, setAgentId, setAgentStartTime, setStringId, setStringValue)
 
       // 获取当前时间
-      getTime()
+//      getTime()
 
       // 将数据存储到MySQL
       MysqlUtil.saveTo_str(strBean)
@@ -246,7 +247,7 @@ object Spark_KafkaTOMySQL_V4 {
       val spanBean = SpanBean(version,agentId,applicationId,agentStartTime,transactionId,spanId,parentSpanId,parentApplicationId,parentApplicationServiceType,startTime,elapsed,rpc,serviceType,endPoint,apiId,annotationBoList,flag,errCode,spanEventBoList,collectorAcceptTime,exceptionId,exceptionMessage,	exceptionClass,applicationServiceType,acceptorHost,remoteAddr,loggingTransactionInfo,root,rawVersion)
 
       // 获取当前时间
-      getTime()
+//      getTime()
 
       // 将数据存储到MySQL
       MysqlUtil.saveTo_span(spanBean)
@@ -268,7 +269,7 @@ object Spark_KafkaTOMySQL_V4 {
       val spanChuckBean = SpanChunkBean(version,agentId,applicationId,agentStartTime,transactionId,spanId,endPoint,serviceType,applicationServiceType,spanEventBoList)
 
       // 获取当前时间
-      getTime()
+//      getTime()
       // 将数据存储到MySQL
       MysqlUtil.saveTo_spanChunk(spanChuckBean)
 
@@ -294,7 +295,7 @@ object Spark_KafkaTOMySQL_V4 {
       val apikBean = ApiBean(agentId,startTime,apiId,apiInfo,lineNumber,methodTypeEnum,description,setLine,setType,setAgentId,setAgentStartTime,setApiId,setApiInfo)
 
       // 获取当前时间
-      getTime()
+//      getTime()
       // 将数据存储到MySQL
       MysqlUtil.saveTo_api(apikBean)
     } else if (topics.equals("AIOPS_ETE_SERVSQLTOPO")){  //sql       	  AIOPS_ETE_SERVSQLTOPO
@@ -315,7 +316,7 @@ object Spark_KafkaTOMySQL_V4 {
       val sqlBean = SqlBean(agentId,startTime,sqlId,sql,hashCode,setAgentId,setAgentStartTime,setSqlId,setSql)
 
       // 获取当前时间
-      getTime()
+//      getTime()
       // 将数据存储到MySQL
       MysqlUtil.saveTo_sql(sqlBean)
     } else if (topics.equals("AIOPS_ETE_SERVUNKNOWN")){  // unknown  	    AIOPS_ETE_SERVUNKNOWN
@@ -324,7 +325,7 @@ object Spark_KafkaTOMySQL_V4 {
       val unknownBean = UnknownBean(valJson)
 
       // 获取当前时间
-      getTime()
+//      getTime()
       // 将数据存储到MySQL
       MysqlUtil.saveTo_unknown(unknownBean)
     } else if (topics.equals("AIOPS_ETE_SERVSTATTOPO")){  // stat      AIOPS_ETE_SERVSTATTOPO
@@ -367,7 +368,7 @@ object Spark_KafkaTOMySQL_V4 {
       // 将数据写入Bean中
       val statBean = StatBean(timeStamp , field , valJson)
       // 获取当前时间
-      getTime()
+//      getTime()
       // 将数据存储到MySQL
       MysqlUtil.saveTo_stat(statBean)
     }

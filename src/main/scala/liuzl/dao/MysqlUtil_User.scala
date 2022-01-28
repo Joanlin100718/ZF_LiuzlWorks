@@ -75,7 +75,7 @@ object MysqlUtil_User {
       ps.setLong(1, offset)
       ps.setString(2, topic)
 
-      println("****************************offset已更新*********************************")
+//      println("****************************offset已更新*********************************")
 
       ps.executeUpdate()
 
@@ -105,41 +105,9 @@ object MysqlUtil_User {
     try {
       conn=c3p0.getConnection
 
+      // 定义列表，用于存储 字段名、对应值。
       val lists  = scala.collection.mutable.ListBuffer("")
       lists.remove(0)
-
-//      if (! Option(userBean.userId).exists(_.trim.isEmpty)){
-//        lists.append("userId")
-//        lists.append(userBean.userId)
-//      }
-//      if (! Option(userBean.mobile).exists(_.trim.isEmpty)){
-//        lists.append("mobile")
-//        lists.append(userBean.mobile)
-//      }
-//      if (! Option(userBean.userName).exists(_.trim.isEmpty)) {
-//        lists.append("userName")
-//        lists.append(userBean.userName)
-//      }
-//      if (! Option(userBean.password).exists(_.trim.isEmpty)){
-//        lists.append("password")
-//        lists.append(userBean.password)
-//      }
-//      if (! Option(userBean.nickName).exists(_.trim.isEmpty)){
-//        lists.append("nickName")
-//        lists.append(userBean.nickName)
-//      }
-//      if (! Option(userBean.phonenumber).exists(_.trim.isEmpty) ){
-//        lists.append("phonenumber")
-//        lists.append(userBean.phonenumber)
-//      }
-//      if (! Option(userBean.userType).exists(_.trim.isEmpty)){
-//        lists.append("userType")
-//        lists.append(userBean.userType)
-//      }
-//      if (! Option(userBean.params).exists(_.trim.isEmpty) ){
-//        lists.append("params")
-//        lists.append(userBean.params)
-//      }
 
       if (! Option(userBean.userId).toString.equals("None")){
         lists.append("userId")
@@ -174,9 +142,10 @@ object MysqlUtil_User {
         lists.append(userBean.params)
       }
 
-      //SQL语句
+      // SQL 前置语句
       var splicingSqlSentence :String = "update `jq_register` set "
 
+      // 对更新语句进行拼接
       for (pointer <- 0 to lists.length-1 by 2 ){
         splicingSqlSentence = splicingSqlSentence.concat( " " + lists(pointer) + "='" + lists(pointer + 1 ) + "'," )
       }
@@ -190,8 +159,10 @@ object MysqlUtil_User {
       } else {
         updateSqlSentence = splicingSqlSentence.dropRight(1) +  " where userId = '" + userBean.userId + "';"
       }
+
+      // 提交更新sql语句
       ps = conn.prepareStatement(updateSqlSentence)
-      println("****************************更新了一个*********************************")
+//      println("****************************更新了一个*********************************")
       ps.executeUpdate()
 
     } catch {
@@ -231,7 +202,7 @@ object MysqlUtil_User {
       ps.setBoolean(8	, userBean.admin)
       ps.setString(	9	, userBean.params	)
 
-      println("************************存一个*************************")
+//      println("************************存一个*************************")
       ps.executeUpdate()
 
     } catch {
@@ -265,7 +236,7 @@ object MysqlUtil_User {
       ps=conn.prepareStatement(sqlSentence)
       ps.setString(	1	, delUserId	)
 
-      println("************************删了一个*************************")
+//      println("************************删了一个*************************")
       ps.executeUpdate()
 
     } catch {
