@@ -102,7 +102,7 @@ object MysqlUtil_Apps {
     try {
       conn=c3p0.getConnection
       //SQL语句
-      ps=conn.prepareStatement("insert into application_usage values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW())")
+      ps=conn.prepareStatement("insert into application_usage values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,DATE_FORMAT( CURDATE() , '%Y%m%d' ))")
 
       ps.setString( 	1,	applicationUsageBean.employee_id	)
       ps.setString( 	2,	applicationUsageBean.full_name	)
@@ -148,7 +148,7 @@ object MysqlUtil_Apps {
     try {
       conn=c3p0.getConnection
       //SQL语句
-      ps=conn.prepareStatement("insert into application_traffic_usage values(?,?,?,?,?,?,?,?,?,?,?,?,NOW())")
+      ps=conn.prepareStatement("insert into application_traffic_usage values(?,?,?,?,?,?,?,?,?,?,?,?,DATE_FORMAT(CURDATE() , '%Y%m%d'))")
 
       ps.setString( 	1,	applicationTrafficUsageBean.employee_id	)
       ps.setString( 	2,	applicationTrafficUsageBean.full_name	)
@@ -192,7 +192,7 @@ object MysqlUtil_Apps {
     try {
       conn=c3p0.getConnection
       //SQL语句
-      ps=conn.prepareStatement("insert into application_duration values(?,?,?,?,?,?,?,?,?,?,NOW())")
+      ps=conn.prepareStatement("insert into application_duration values(?,?,?,?,?,?,?,?,?,?,DATE_FORMAT( CURDATE() , '%Y%m%d' ))")
 
       ps.setString(   1,	applicationDurationBean.employee_id	)
       ps.setString(   2,	applicationDurationBean.package_name	)

@@ -40,14 +40,17 @@ object Spark_KafkaTOMySQL_Apps {
 
     val sparkConf = new SparkConf()
       .setAppName("SendSampleKafkaDataToApple")
-      .setMaster("local[*]")
+      .setMaster("local")
       .set("spark.app.id", "streaming_kafka")
+//      .set("dfs.client.use.datanode.hostname", "true")
+//      .set("dfs.replication", "2")
 
     // 定义SparkStreamingContext
     val ssc = new StreamingContext(sparkConf, Seconds(split_rdd_time))
 
     // 定义警告级别
     ssc.sparkContext.setLogLevel("WARN")
+
 
     // 定义检查点
 //    ssc.checkpoint("D://checkpoint")
@@ -134,21 +137,25 @@ object Spark_KafkaTOMySQL_Apps {
       val	device_id	= resJson.getString("device_id")
       val	package_name	= resJson.getString("package_name")
       val	app_name	= resJson.getString("app_name")
-      val	wifi_flow	= resJson.getString("wifi_flow")
-      val	mobile_flow	= resJson.getString("mobile_flow")
+      val	version_code	= resJson.getString("version_code")
+      val	version_name	= resJson.getString("version_name")
+      val	`type`	= resJson.getString("TYPE")
+      val	typeDesc	= resJson.getString("typeDesc")
       val	tenant_id	= resJson.getString("tenant_id")
-      val	collect_date	= resJson.getString("collect_date")
+      val	occur_time	= resJson.getString("occur_time")
       val	upload_time	= resJson.getString("upload_time")
       val	create_time	= resJson.getString("create_time")
 
       // 写入Bean中
-      val applicationTrafficUsageBean = ApplicationTrafficUsageBean(employee_id,full_name,phone_num,device_id,package_name,app_name,wifi_flow,mobile_flow,tenant_id,collect_date,upload_time,create_time)
+      val applicationUsageBean = ApplicationUsageBean(employee_id,full_name,phone_num,device_id,package_name,app_name,version_code,version_name,`type`,typeDesc,tenant_id,occur_time,upload_time,create_time)
 
       // 获取当前时间
       getTime()
 
       // 将数据存储到MySQL
-      MysqlUtil_Apps.saveTo_application_traffic_usage(applicationTrafficUsageBean)
+      MysqlUtil_Apps.saveTo_application_usage(applicationUsageBean)
+
+
     } else if (topics.equals("application_traffic_usage")) { // 流量统计
       // 解析JSON
       val resJson = JSON.parseObject(valJson)
