@@ -66,7 +66,8 @@ object Spark_KafkaTOMySQL_V3 {
 
     // 添加topic配置
     val kafkaParams = Map[String, Object](
-      ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG -> "192.168.165.181:8422,192.168.165.180:8422,192.168.165.179:8422",
+//      ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG -> "192.168.165.181:8422,192.168.165.180:8422,192.168.165.179:8422",
+      ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG -> "192.168.166.17:8422,192.168.166.16:8422,192.168.166.15:8422",
       ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG -> classOf[StringDeserializer],
       ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG -> classOf[StringDeserializer],
       ConsumerConfig.GROUP_ID_CONFIG -> "Liuzl",
