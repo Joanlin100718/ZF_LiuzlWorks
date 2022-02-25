@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON
 import kafka.common.TopicAndPartition
 import kafka.message.MessageAndMetadata
 import kafka.serializer.StringDecoder
-import liuzl.dao.{MysqlUtil, MysqlUtil_Apps}
+import liuzl.dao.{MysqlUtil_SysOamp, MysqlUtil_Apps}
 import liuzl.pojo.{ApplicationUsageBean, _}
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.dstream.InputDStream

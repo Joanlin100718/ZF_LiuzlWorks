@@ -4,8 +4,7 @@ import com.alibaba.fastjson.JSON
 import kafka.common.TopicAndPartition
 import kafka.message.MessageAndMetadata
 import kafka.serializer.StringDecoder
-import liuzl.dao.{MysqlUtil, MysqlUtil_User}
-import liuzl.kafkasource.Spark_KafkaTOMySQL_V4.getTime
+import liuzl.dao.{MysqlUtil_User}
 import liuzl.pojo._
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.dstream.InputDStream
@@ -26,14 +25,15 @@ object Spark_KafkaTOMySQL_OnlyUser {
   def main(args: Array[String]): Unit = {
 
     // 定义kafka集群配置信息
-    val brokers = "192.168.165.203:9092"
+//    val brokers = "192.168.165.203:9092"
+    val brokers = "192.168.166.17:8422,192.168.166.16:8422,192.168.166.15:8422"
 
     // 定义topics列表
     val topics =
                 "sys_user_add,"  +
                 "sys_user_del,"  +
-                "sys_user_update,"  +
-                "user"
+                "sys_user_update"
+//                "user"
 
     // 定义时间间隔，（默认为5秒）
     val split_rdd_time = 8

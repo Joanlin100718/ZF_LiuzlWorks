@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON
 import kafka.common.TopicAndPartition
 import kafka.message.MessageAndMetadata
 import kafka.serializer.StringDecoder
-import liuzl.dao.MysqlUtil
+import liuzl.dao.MysqlUtil_SysOamp
 import liuzl.pojo._
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.dstream.InputDStream
@@ -16,7 +16,9 @@ import java.util.Date
 
 /*
 *
-* 这个版本通过直接设置开始读取的offset 重启程序时，步入工作较快
+* 该程序是从自己维护的Offset数据库中直接从指定位置开始读取
+*
+* 该程序只存储“系统运维”数据中topic内的数据（全部Topic）
 *
 *
 *
@@ -120,7 +122,7 @@ object Spark_KafkaTOMySQL_Pass {
         // 存储数据
         saveKafkaData(topic , valJson)
         // 更新数据库中的offset
-        MysqlUtil.updateKafkaOffset(topic,partition,offset)
+        MysqlUtil_SysOamp.updateKafkaOffset(topic,partition,offset)
 
       }
     }
@@ -183,7 +185,7 @@ object Spark_KafkaTOMySQL_Pass {
 //        getTime()
 
         // 将数据存储到MySQL
-        MysqlUtil.saveTo_agent(agentBean )
+        MysqlUtil_SysOamp.saveTo_agent(agentBean )
       } else {
 
         val		version		= resJson.getString("version")
@@ -199,7 +201,7 @@ object Spark_KafkaTOMySQL_Pass {
         getTime()
 
         // 将数据存储到MySQL
-        MysqlUtil.saveTo_agentTail(agentTailBean )
+        MysqlUtil_SysOamp.saveTo_agentTail(agentTailBean )
       }
     } else if (topics.equals("AIOPS_ETE_SERVSTRTOPO")){ // str    AIOPS_ETE_SERVSTRTOPO
       // 解析JSON
@@ -219,7 +221,7 @@ object Spark_KafkaTOMySQL_Pass {
 //      getTime()
 
       // 将数据存储到MySQL
-      MysqlUtil.saveTo_str(strBean)
+      MysqlUtil_SysOamp.saveTo_str(strBean)
     } else if (topics.equals("AIOPS_ETE_SERVFRAMETOPO")){  //span      	  AIOPS_ETE_SERVFRAMETOPO
       // 解析JSON
       val resJson = JSON.parseObject(valJson)
@@ -259,7 +261,7 @@ object Spark_KafkaTOMySQL_Pass {
 //      getTime()
 
       // 将数据存储到MySQL
-      MysqlUtil.saveTo_span(spanBean)
+      MysqlUtil_SysOamp.saveTo_span(spanBean)
     } else if (topics.equals("AIOPS_ETE_SERVCHUNKTOPO")){  //spanChunk	    AIOPS_ETE_SERVCHUNKTOPO
       // 解析JSON
       val resJson = JSON.parseObject(valJson)
@@ -280,7 +282,7 @@ object Spark_KafkaTOMySQL_Pass {
       // 获取当前时间
 //      getTime()
       // 将数据存储到MySQL
-      MysqlUtil.saveTo_spanChunk(spanChuckBean)
+      MysqlUtil_SysOamp.saveTo_spanChunk(spanChuckBean)
 
     } else if (topics.equals("AIOPS_ETE_SERVAPITOPO")){  //api      	    AIOPS_ETE_SERVAPITOPO
       // 解析JSON
@@ -306,7 +308,7 @@ object Spark_KafkaTOMySQL_Pass {
       // 获取当前时间
 //      getTime()
       // 将数据存储到MySQL
-      MysqlUtil.saveTo_api(apikBean)
+      MysqlUtil_SysOamp.saveTo_api(apikBean)
     } else if (topics.equals("AIOPS_ETE_SERVSQLTOPO")){  //sql       	  AIOPS_ETE_SERVSQLTOPO
       // 解析JSON
       val resJson = JSON.parseObject(valJson)
@@ -327,7 +329,7 @@ object Spark_KafkaTOMySQL_Pass {
       // 获取当前时间
 //      getTime()
       // 将数据存储到MySQL
-      MysqlUtil.saveTo_sql(sqlBean)
+      MysqlUtil_SysOamp.saveTo_sql(sqlBean)
     } else if (topics.equals("AIOPS_ETE_SERVUNKNOWN")){  // unknown  	    AIOPS_ETE_SERVUNKNOWN
 
       // 将数据写入Bean中
@@ -336,7 +338,7 @@ object Spark_KafkaTOMySQL_Pass {
       // 获取当前时间
 //      getTime()
       // 将数据存储到MySQL
-      MysqlUtil.saveTo_unknown(unknownBean)
+      MysqlUtil_SysOamp.saveTo_unknown(unknownBean)
     } else if (topics.equals("AIOPS_ETE_SERVSTATTOPO")){  // stat      AIOPS_ETE_SERVSTATTOPO
 
       // 找到第一个 timestamp 下标
@@ -379,7 +381,7 @@ object Spark_KafkaTOMySQL_Pass {
       // 获取当前时间
 //      getTime()
       // 将数据存储到MySQL
-      MysqlUtil.saveTo_stat(statBean)
+      MysqlUtil_SysOamp.saveTo_singleStat(statBean)
     }
   }
 
@@ -435,7 +437,7 @@ object Spark_KafkaTOMySQL_Pass {
     for (topic <- topicLists){
 
       // 获取各个partition对应的offset
-      val lists = MysqlUtil.selectOffsetList(topic)
+      val lists = MysqlUtil_SysOamp.selectOffsetList(topic)
 
       // 定义数据下标
       var index = 0
