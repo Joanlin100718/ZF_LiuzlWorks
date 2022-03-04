@@ -516,14 +516,17 @@ object MysqlUtil_SysOamp {
     try {
       conn=c3p0.getConnection
       val	timeStamp = statBean.timestamp
+
+      // 根据时间戳获取时间
+      val conversionDate = getDateFromTimeStamp(timeStamp.toLong)
       // 定义获取对应字段
       val field = statBean.field
       // 定义查询语句
-      val SQLSentence = "select first_timestamp from stat where first_timestamp=" + timeStamp + ";"
+      val SQLSentence = "select first_timestamp from `STAT_" +  conversionDate  + "` where first_timestamp=" + timeStamp + ";"
       ps = conn.prepareStatement(SQLSentence)
       rs = ps.executeQuery()
 
-      val conversionDate = getDateFromTimeStamp(timeStamp.toLong)
+
 
       if (rs.next()) {
         // 更新语句
