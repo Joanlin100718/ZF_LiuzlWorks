@@ -40,7 +40,7 @@ object Spark_KafkaTOMySQL_Pass_SingleStat {
     // 创建上下文
 
     val sparkConf = new SparkConf()
-      .setAppName("SendSampleKafkaDataToApple")
+      .setAppName("collectionStat")
       .setMaster("yarn")
       .set("spark.app.id", "streaming_kafka")
 //      .set("mapreduce.output.fileoutputformat.outputdir", "/data01/SparkJar/tmp")
@@ -61,7 +61,7 @@ object Spark_KafkaTOMySQL_Pass_SingleStat {
     // kafka 配置参数
     val kafkaParams: Map[String, String] = Map[String, String](
       "metadata.broker.list" -> brokers,
-      "group.id" -> "liuzl",
+      "group.id" -> "liuZL",
       "serializer.class" -> "kafka.serializer.StringEncoder"
       //      "auto.offset.reset" -> "largest"   //自动将偏移重置为最新偏移（默认）
       //      "auto.offset.reset" -> "earliest"  //自动将偏移重置为最早的偏移

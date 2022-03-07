@@ -48,7 +48,7 @@ object Spark_KafkaTOMySQL_Pass_SurplusStat {
 
     val sparkConf = new SparkConf()
       .setAppName("SendSampleKafkaDataToApple")
-      .setMaster("yarn")
+      .setMaster("local")
       .set("spark.app.id", "streaming_kafka")
 //      .set("mapreduce.output.fileoutputformat.outputdir", "/data01/SparkJar/tmp")
 
@@ -93,6 +93,7 @@ object Spark_KafkaTOMySQL_Pass_SurplusStat {
     // 根据定义的topics列表，构建Map参数
     val fromOffsets = setFromOffsets(topics)     //构建参数
 
+    println(fromOffsets)
     // 构建返回数据的参数
     val messageHandler = (mam: MessageAndMetadata[String, String]) => ( mam.topic, mam.partition , mam.offset, mam.message()) //构建MessageAndMetadata
 
@@ -198,7 +199,7 @@ object Spark_KafkaTOMySQL_Pass_SurplusStat {
         val agentTailBean = AgentTailBean(version,agentId,startTimestamp,eventTimestamp,eventIdentifier,agentLifeCycleState)
 
         // 获取当前时间
-        getTime()
+//        getTime()
 
         // 将数据存储到MySQL
         MysqlUtil_SysOamp.saveTo_agentTail(agentTailBean )

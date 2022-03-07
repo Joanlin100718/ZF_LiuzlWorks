@@ -1,18 +1,18 @@
 package liuzl.utils
 
 import com.alibaba.druid.Constants
+import javax.sql.DataSource
 
 import java.sql.{Connection, PreparedStatement, ResultSet, SQLException, Statement}
 import java.util.Properties
 import com.alibaba.druid.pool.DruidDataSourceFactory
 
-import javax.sql.DataSource
 import org.slf4j.LoggerFactory
 
 /**
  * Druid 连接池工具类
  *
- * create by LiuJinHe 2020/8/5
+ * create by LiuZL 2022/3/3
  */
 object JDBC_Druid {
 
@@ -25,7 +25,7 @@ object JDBC_Druid {
 
   pro.load(JDBC_Druid.getClass.getClassLoader.getResourceAsStream("druid.properties"))
 
-
+//  println(pro)
   def initDataSource(): DataSource = {
     if(ds == null){
       try {
@@ -33,6 +33,8 @@ object JDBC_Druid {
       } catch {
         case e: Exception =>
           logger.error("初始化连接池失败...", e)
+      } finally {
+        ds
       }
     }
     ds
@@ -132,6 +134,8 @@ object JDBC_Druid {
     }
     close(conn)
   }
+
+
 
   /**
    * 关闭连接

@@ -1,11 +1,11 @@
 package liuzl.kafkasource
 
-import com.alibaba.fastjson.{JSON, JSONObject}
+import com.alibaba.fastjson.JSON
 import kafka.common.TopicAndPartition
 import kafka.message.MessageAndMetadata
 import kafka.serializer.StringDecoder
-import liuzl.dao.MysqlUtil_Apps
-import liuzl.pojo.{AppOperationBean, AppUsageDurationBean, AppUsageFlowBean, _}
+import liuzl.dao.{MysqlUtil_Apps, MysqlUtil_Apps_Batch}
+import liuzl.pojo.{AppOperationBean, AppUsageDurationBean, AppUsageFlowBean}
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.dstream.InputDStream
 import org.apache.spark.streaming.kafka.KafkaUtils
@@ -13,26 +13,26 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 import java.text.SimpleDateFormat
 import java.util.Date
-import util.control.Breaks._
+import scala.collection.mutable.ListBuffer
 
 /*
 *
 *  1. 这个版本通过直接设置开始读取的offset 重启程序时，步入工作较快
-*  2. 单次查询，单次写入，对于以前的对接方式比较适应，不适合罪行的对接方式
-*
+*  2. 批量提交一条topic中的数据，数据插入较快，可应对现阶段数据采集
 * */
 
 
-object Spark_KafkaTOMySQL__Pass_Apps {
+object Spark_KafkaTOMySQL__Pass_Apps_Datch {
   def main(args: Array[String]): Unit = {
 
+    getTime()
     // 定义kafka集群配置信息
     val brokers = "192.168.166.17:8422,192.168.166.16:8422,192.168.166.15:8422"
 
     // 定义topics列表
     val topics =
-//                "AppOperation,"  +  //应用使用情况
-                "AppUsageFlow,"  +  //应用使用流量信息
+                "AppOperation,"  +  //应用使用情况
+                "AppUsageFlow," +  //应用使用流量信息
                 "AppUsageDuration"  //应用使用时长
 
 
@@ -44,8 +44,8 @@ object Spark_KafkaTOMySQL__Pass_Apps {
       .setAppName("AppsData")
       .setMaster("local")
       .set("spark.app.id", "streaming_kafka")
-      .set("dfs.client.use.datanode.hostname", "true")
-      .set("dfs.replication", "2")
+//      .set("dfs.client.use.datanode.hostname", "true")
+//      .set("dfs.replication", "2")
 
     // 定义SparkStreamingContext
     val ssc = new StreamingContext(sparkConf, Seconds(split_rdd_time))
@@ -59,7 +59,7 @@ object Spark_KafkaTOMySQL__Pass_Apps {
     // kafka 配置参数
     val kafkaParams: Map[String, String] = Map[String, String](
       "metadata.broker.list" -> brokers,
-      "group.id" -> "liuzl",
+      "group.id" -> "liuZL",
       "serializer.class" -> "kafka.serializer.StringEncoder"
       //      "auto.offset.reset" -> "largest"   //自动将偏移重置为最新偏移（默认）
       //      "auto.offset.reset" -> "earliest"  //自动将偏移重置为最早的偏移
@@ -117,7 +117,7 @@ object Spark_KafkaTOMySQL__Pass_Apps {
         }
 
         // 更新数据库中的offset
-        MysqlUtil_Apps.updateKafkaOffset(topic,partition,offset)
+        MysqlUtil_Apps_Batch.updateKafkaOffset(topic,partition,offset)
       }
     }
     ssc.start()
@@ -130,12 +130,15 @@ object Spark_KafkaTOMySQL__Pass_Apps {
   * */
   def saveAppOperation( topics:String, valJson:String ) : Unit = {
 
+    val listAppOperationBean = new ListBuffer[AppOperationBean]
     // 解析JSON 拿到Data中的数据
     val primaryJson = JSON.parseObject(valJson)
     val dataArray = primaryJson.getString("data")
 
     // 将data中的数据转化为Array
     val jsonArray = JSON.parseArray(dataArray)
+
+
 
     // 遍历Array中的数据进行数据解析
     for (i <- 0.to(jsonArray.size() - 1)) {
@@ -160,11 +163,12 @@ object Spark_KafkaTOMySQL__Pass_Apps {
       // 写入Bean中
       val appOperationBean = AppOperationBean(packageName,	appName,	employeeId,	phoneNum, deviceId,	versionCode,	versionName,	`type`,	occurTime,	uploadTime,	createTime)
 
-//      println(appOperationBean)
+      // 将appOperationBean 加入List批次列表
+      listAppOperationBean.append(appOperationBean)
 
-      // 将数据存储到MySQL
-      MysqlUtil_Apps.saveAppOperationToMySQL(appOperationBean)
     }
+    // 将数据存储到MySQL
+    MysqlUtil_Apps_Batch.saveAppOperationToMySQL(listAppOperationBean)
   }
 
 
@@ -176,6 +180,9 @@ object Spark_KafkaTOMySQL__Pass_Apps {
   * */
 
   def saveAppUsageFlow( topics:String, valJson:String ) : Unit = {
+
+    // 定义存储批量数据
+    val listAppUsageFlowBean = new ListBuffer[AppUsageFlowBean]
 
     // 解析JSON 拿到Data中的数据
     val primaryJson = JSON.parseObject(valJson)
@@ -201,15 +208,14 @@ object Spark_KafkaTOMySQL__Pass_Apps {
       val	uploadTime	= resJson.getString("uploadTime")
       val	createTime	= resJson.getString("createTime")
 
-
       // 写入Bean中
       val appUsageFlowBean = AppUsageFlowBean(employeeId,phoneNum,deviceId,packageName,appName,wifiFlow,mobileFlow,collectDate,uploadTime,createTime)
 
-//      println(appUsageFlowBean)
-      // 将数据存储到MySQL
-      MysqlUtil_Apps.saveAppUsageFlowToMySQL(appUsageFlowBean)
+      listAppUsageFlowBean.append(appUsageFlowBean)
 
     }
+    // 将数据存储到MySQL
+    MysqlUtil_Apps_Batch.saveAppUsageFlowToMySQL(listAppUsageFlowBean)
   }
 
 
@@ -220,6 +226,8 @@ object Spark_KafkaTOMySQL__Pass_Apps {
   *
   * */
   def saveAppUsageDuration( topics:String, valJson:String ) : Unit = {
+
+    val listAppUsageDurationBean = new ListBuffer[AppUsageDurationBean]
 
     // 解析JSON 拿到Data中的数据
     val primaryJson = JSON.parseObject(valJson)
@@ -249,15 +257,13 @@ object Spark_KafkaTOMySQL__Pass_Apps {
       val	createTime	= resJson.getString("createTime")
 
 
-
       // 写入Bean中
       val appUsageDurationBean = AppUsageDurationBean(employeeId,phoneNum,deviceId,packageName,appName,useDuration,openTimes,appCount,collectDate,uploadTime,createTime)
 
-//      println(appUsageDurationBean)
-
-      // 将数据存储到MySQL
-      MysqlUtil_Apps.saveAppUsageDurationToMySQL(appUsageDurationBean)
+      listAppUsageDurationBean.append(appUsageDurationBean)
     }
+    // 将数据存储到MySQL
+    MysqlUtil_Apps_Batch.saveAppUsageDurationToMySQL(listAppUsageDurationBean)
   }
 
 
@@ -286,7 +292,7 @@ object Spark_KafkaTOMySQL__Pass_Apps {
     for (topic <- topicLists){
 
       // 获取各个partition对应的offset
-      val lists = MysqlUtil_Apps.selectOffsetList(topic)
+      val lists = MysqlUtil_Apps_Batch.selectOffsetList(topic)
 
       // 定义数据下标
       var index = 0

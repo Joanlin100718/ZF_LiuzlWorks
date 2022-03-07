@@ -2,19 +2,28 @@ package liuzl.dao
 
 import com.mchange.v2.c3p0.ComboPooledDataSource
 import liuzl.pojo._
-import liuzl.utils.JDBC_Druid
 
 import java.sql.{Connection, PreparedStatement, ResultSet}
 import scala.collection.mutable.ListBuffer
 
-object MysqlUtil_Apps {
-  
-  val c3p0=new ComboPooledDataSource("AppsSource")
 
-  private var conn:Connection=JDBC_Druid.getConnection
-  private var ps:PreparedStatement=_
-  private var rs:ResultSet=_
-  private var count = 8
+
+/*
+*
+*
+*  1. 通过C3P0连接数据库
+*  2. 单次提交插入语句
+*  3. 插入数据缓慢
+*
+*
+*
+* */
+
+
+
+object MysqlUtil_Apps {
+
+  val c3p0=new ComboPooledDataSource("AppsSource")
 
 
   /*
@@ -22,7 +31,9 @@ object MysqlUtil_Apps {
   *
   * */
   def selectOffsetList (topic:String ) : ListBuffer[Long] ={
-
+    val conn:Connection=c3p0.getConnection
+    var ps:PreparedStatement=null
+    var rs:ResultSet=null
 
     // 创建变长的List 存储数据返回
     val list = scala.collection.mutable.ListBuffer(1L)
@@ -37,7 +48,6 @@ object MysqlUtil_Apps {
       rs = ps.executeQuery()
 
       while (rs.next()){
-
         list.append(rs.getInt("partition0").toLong)
         list.append(rs.getInt("partition1").toLong)
         list.append(rs.getInt("partition2").toLong)
@@ -45,14 +55,21 @@ object MysqlUtil_Apps {
         list.append(rs.getInt("partition4").toLong)
         list.append(rs.getInt("partition5").toLong)
       }
-      list
 
     } catch {
       case t: Throwable => t.printStackTrace() // TODO: handle error
-        list
     }finally {
-
+      if (conn != null) {
+        conn.close()
+      }
+      if (ps != null) {
+        ps.close()
+      }
+      if (rs != null) {
+        rs.close()
+      }
     }
+    list
 
   }
 
@@ -62,7 +79,9 @@ object MysqlUtil_Apps {
   * 更新数据库中offset值
   * */
   def updateKafkaOffset(topic:String, partition : Int, offset:Long) : Unit ={
-
+    val conn:Connection=c3p0.getConnection
+    var ps:PreparedStatement=null
+    var rs:ResultSet=null
     try {
 
       // 更新offset 语句
@@ -76,16 +95,17 @@ object MysqlUtil_Apps {
 
       ps.executeUpdate()
 
-
     } catch {
       case t: Throwable => t.printStackTrace() // TODO: handle error
     }finally {
-      count -= 1
-      if (count == 0 ){
-        JDBC_Druid.commit(conn)
-        JDBC_Druid.close(ps , conn, rs)
-        conn=JDBC_Druid.getConnection
-        count = 8
+      if (conn != null) {
+        conn.close()
+      }
+      if (ps != null) {
+        ps.close()
+      }
+      if (rs != null) {
+        rs.close()
       }
     }
 
@@ -96,7 +116,9 @@ object MysqlUtil_Apps {
    * 数据存储到对应表中
    */
   def saveAppOperationToMySQL(appOperationBean: AppOperationBean ) = {
-
+    val conn:Connection=c3p0.getConnection
+    var ps:PreparedStatement=null
+    var rs:ResultSet=null
     try {
 
       //SQL语句
@@ -121,12 +143,14 @@ object MysqlUtil_Apps {
     } catch {
       case t: Throwable => t.printStackTrace() // TODO: handle error
     }finally {
-      count -= 1
-      if (count == 0 ){
-        JDBC_Druid.commit(conn)
-        JDBC_Druid.close(ps , conn, rs)
-        conn=JDBC_Druid.getConnection
-        count = 8
+      if (conn != null) {
+        conn.close()
+      }
+      if (ps != null) {
+        ps.close()
+      }
+      if (rs != null) {
+        rs.close()
       }
     }
   }
@@ -139,7 +163,9 @@ object MysqlUtil_Apps {
    * 数据存储到对应表中
    */
   def saveAppUsageFlowToMySQL(appUsageFlowBean: AppUsageFlowBean ) = {
-
+    val conn:Connection=c3p0.getConnection
+    var ps:PreparedStatement=null
+    var rs:ResultSet=null
     try {
 
       //SQL语句
@@ -161,12 +187,14 @@ object MysqlUtil_Apps {
     } catch {
       case t: Throwable => t.printStackTrace() // TODO: handle error
     }finally {
-      count -= 1
-      if (count == 0 ){
-        JDBC_Druid.commit(conn)
-        JDBC_Druid.close(ps , conn, rs)
-        conn=JDBC_Druid.getConnection
-        count = 8
+      if (conn != null) {
+        conn.close()
+      }
+      if (ps != null) {
+        ps.close()
+      }
+      if (rs != null) {
+        rs.close()
       }
     }
   }
@@ -180,7 +208,9 @@ object MysqlUtil_Apps {
    * 数据存储到对应表中
    */
   def saveAppUsageDurationToMySQL(appUsageDurationBean: AppUsageDurationBean ) = {
-
+    val conn:Connection=c3p0.getConnection
+    var ps:PreparedStatement=null
+    var rs:ResultSet=null
     try {
 
       //SQL语句
@@ -205,12 +235,14 @@ object MysqlUtil_Apps {
     } catch {
       case t: Throwable => t.printStackTrace() // TODO: handle error
     }finally {
-      count -= 1
-      if (count == 0 ){
-        JDBC_Druid.commit(conn)
-        JDBC_Druid.close(ps , conn, rs)
-        conn=JDBC_Druid.getConnection
-        count = 8
+      if (conn != null) {
+        conn.close()
+      }
+      if (ps != null) {
+        ps.close()
+      }
+      if (rs != null) {
+        rs.close()
       }
     }
   }
