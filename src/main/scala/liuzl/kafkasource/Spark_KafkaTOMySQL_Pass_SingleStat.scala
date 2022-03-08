@@ -3,7 +3,7 @@ package liuzl.kafkasource
 import kafka.common.TopicAndPartition
 import kafka.message.MessageAndMetadata
 import kafka.serializer.StringDecoder
-import liuzl.dao.{MysqlUtil_SysOamp, MysqlUtil_SysOamp_Test}
+import liuzl.dao.{MysqlUtil_SysOamp, MysqlUtil_SysOamp_Batch}
 import liuzl.pojo._
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.dstream.InputDStream

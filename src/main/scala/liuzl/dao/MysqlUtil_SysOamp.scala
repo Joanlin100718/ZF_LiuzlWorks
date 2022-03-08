@@ -3,8 +3,9 @@ package liuzl.dao
 
 import com.alibaba.fastjson.JSON
 import com.mchange.v2.c3p0.ComboPooledDataSource
-import liuzl.dao.MysqlUtil_SysOamp_Test.c3p0
+import liuzl.dao.MysqlUtil_SysOamp_Batch.c3p0
 import liuzl.pojo.{AgentBean, AgentTailBean, ApiBean, SpanBean, SpanChunkBean, SqlBean, StatBean, StrBean, UnknownBean}
+import liuzl.utils.JDBC_Druid
 
 import java.sql.Connection
 import java.sql.PreparedStatement
@@ -498,6 +499,62 @@ object MysqlUtil_SysOamp {
       if(conn!=null)conn.close
     }
   }
+
+  /*
+  * 定义 将stat 数据存储到对应的mysql中
+  * 因数据量较大，该方式存储过慢
+  * */
+  def saveStatToMySQL_Batch( lisStatBean: ListBuffer[StatBean]  ) = {
+
+    //     agentBean: AgentBean * ,apiBean: ApiBean , ChunkBean: ChunkBean,spanBean: SpanBean,sqlBean: SqlBean,statBean: StatBean,strBean: StrBean
+
+    var conn:Connection=null
+    var ps:PreparedStatement=null
+    var rs:ResultSet=null
+
+    try {
+//      conn=c3p0.getConnection
+      conn = JDBC_Druid.getConnection
+
+      var batchIndex = 0
+
+      for (statBean <- lisStatBean) {
+
+        // 获取该条语句的时间戳
+        val	timeStamp = statBean.timestamp
+        // 根据时间戳获取时间
+        val conversionDate = getDateFromTimeStamp(timeStamp.toLong)
+        // 定义获取对应字段
+        val field = statBean.field
+
+        val insertUpdateSql = "INSERT INTO `STAT_"+ conversionDate + "` (" + field + ",first_timestamp,importDate) values (?,?,NOW()) ON DUPLICATE KEY UPDATE " + field + "= VALUES(" + field + ");"
+
+        println(insertUpdateSql)
+        ps = conn.prepareStatement(insertUpdateSql)
+        ps.setString(1, statBean.statValues)
+        ps.setString(2, timeStamp)
+
+        ps.addBatch()
+        batchIndex += 1
+        if(batchIndex % 1000 ==0 && batchIndex != 0){
+          ps.executeBatch()
+          ps.clearBatch()
+        }
+      }
+      println("本批次：" + batchIndex)
+      ps.executeBatch()
+      JDBC_Druid.commit(conn)
+    } catch {
+      case t: Throwable => t.printStackTrace() // TODO: handle error
+
+    }finally {
+//      if(ps!=null)ps.close
+//      if(rs!=null)rs.close
+//      if(conn!=null)conn.close
+      JDBC_Druid.close(ps,conn,rs)
+    }
+  }
+
 
   /*
   * 定义 将stat 数据存储到对应的mysql中
