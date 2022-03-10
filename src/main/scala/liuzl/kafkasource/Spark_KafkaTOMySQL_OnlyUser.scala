@@ -41,7 +41,7 @@ object Spark_KafkaTOMySQL_OnlyUser {
 
     val sparkConf = new SparkConf()
       .setAppName("SendSampleKafkaDataToApple")
-      .setMaster("local")
+      .setMaster("yarn")
       .set("spark.app.id", "streaming_kafka")
 
     // 定义SparkStreamingContext

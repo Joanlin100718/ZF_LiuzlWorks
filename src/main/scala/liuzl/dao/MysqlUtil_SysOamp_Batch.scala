@@ -106,37 +106,35 @@ object MysqlUtil_SysOamp_Batch {
       var batchIndex = 0
 
       for (statBean <- lisStatBean) {
-
         // 获取该条语句的时间戳
         val	timeStamp = statBean.timestamp
         // 根据时间戳获取时间
         val conversionDate = getDateFromTimeStamp(timeStamp.toLong)
         // 定义获取对应字段
         val field = statBean.field
-
-        val insertUpdateSql = "INSERT INTO `STAT_"+ conversionDate + "` (" + field + ",first_timestamp,importDate) values (?,?,NOW()) ON DUPLICATE KEY UPDATE " + field + "= VALUES(" + field + ");"
-
-        println(insertUpdateSql)
+        val insertUpdateSql = "INSERT INTO `STAT_"+ conversionDate + "` (" + field + ",first_timestamp) values (?,?) ON DUPLICATE KEY UPDATE " + field + "= VALUES(" + field + ");"
+//        println(insertUpdateSql)
         ps = conn.prepareStatement(insertUpdateSql)
         ps.setString(1, statBean.statValues)
         ps.setString(2, timeStamp)
 
+//        println(ps)
         ps.addBatch()
-        batchIndex += 1
-        if(batchIndex % 1000 ==0 && batchIndex != 0){
-          ps.executeBatch()
-          ps.clearBatch()
-        }
+        ps.executeBatch()
+//        batchIndex += 1
+//        if(batchIndex % 1000 ==0 && batchIndex != 0){
+//          ps.executeBatch()
+//          ps.clearBatch()
+//        }
       }
+
 //      println("本批次：" + batchIndex)
-      ps.executeBatch()
+//
+//      ps.executeBatch()
       JDBC_Druid_SysOamp.commit(conn)
     } catch {
       case t: Throwable => t.printStackTrace() // TODO: handle error
     }finally {
-      //      if(ps!=null)ps.close
-      //      if(rs!=null)rs.close
-      //      if(conn!=null)conn.close
       JDBC_Druid_SysOamp.close(ps,conn,rs)
     }
   }
@@ -147,7 +145,7 @@ object MysqlUtil_SysOamp_Batch {
    */
   def getDateFromTimeStamp(timestamp: Long): String = {
     val sdf = new SimpleDateFormat("yyyyMMdd")
-    sdf.format(1645578044733L)
+    sdf.format(timestamp)
   }
 
 
@@ -182,5 +180,4 @@ object MysqlUtil_SysOamp_Batch {
     }
     res
   }
-
 }

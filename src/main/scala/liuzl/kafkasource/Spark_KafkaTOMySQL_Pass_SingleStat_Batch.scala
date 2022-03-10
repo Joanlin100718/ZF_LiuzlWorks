@@ -169,21 +169,18 @@ object Spark_KafkaTOMySQL_Pass_SingleStat_Batch {
       }else if ( valJson.contains("\"directCount\"") ) {
         field = "DIRECT_BUFFER"
       }
-
       // 将数据写入Bean中
       val statBean = StatBean(timeStamp , field , valJson)
       // 获取当前时间
 //      getTime()
-
       listStatBean.append(statBean)
-
-      countIndex -= 1
-
       if (countIndex == 0){
         // 将数据存储到MySQL
         MysqlUtil_SysOamp_Batch.saveStatToMySQL_Batch(listStatBean)
         listStatBean.clear()
         countIndex = 20
+      } else {
+        countIndex -= 1
       }
     }
   }
