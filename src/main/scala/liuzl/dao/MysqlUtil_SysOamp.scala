@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSON
 import com.mchange.v2.c3p0.ComboPooledDataSource
 import liuzl.dao.MysqlUtil_SysOamp_Batch.c3p0
 import liuzl.pojo.{AgentBean, AgentTailBean, ApiBean, SpanBean, SpanChunkBean, SqlBean, StatBean, StrBean, UnknownBean}
-import liuzl.utils.JDBC_Druid
+import liuzl.utils.DruidUtils
 
 import java.sql.Connection
 import java.sql.PreparedStatement
@@ -514,7 +514,7 @@ object MysqlUtil_SysOamp {
 
     try {
 //      conn=c3p0.getConnection
-      conn = JDBC_Druid.getConnection
+      conn = DruidUtils.getConnection
 
       var batchIndex = 0
 
@@ -543,7 +543,7 @@ object MysqlUtil_SysOamp {
       }
       println("本批次：" + batchIndex)
       ps.executeBatch()
-      JDBC_Druid.commit(conn)
+      DruidUtils.commit(conn)
     } catch {
       case t: Throwable => t.printStackTrace() // TODO: handle error
 
@@ -551,7 +551,7 @@ object MysqlUtil_SysOamp {
 //      if(ps!=null)ps.close
 //      if(rs!=null)rs.close
 //      if(conn!=null)conn.close
-      JDBC_Druid.close(ps,conn,rs)
+      DruidUtils.close(ps,conn,rs)
     }
   }
 

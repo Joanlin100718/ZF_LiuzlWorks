@@ -31,7 +31,7 @@ object Spark_KafkaTOMySQL__Pass_Apps {
 
     // 定义topics列表
     val topics =
-//                "AppOperation,"  +  //应用使用情况
+                "AppOperation,"  +  //应用使用情况
                 "AppUsageFlow,"  +  //应用使用流量信息
                 "AppUsageDuration"  //应用使用时长
 

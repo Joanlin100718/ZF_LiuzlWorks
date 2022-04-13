@@ -10,7 +10,7 @@
     <profile name="Maven 2" modules="ZF_LiuzlWorks">
       <parameters>
         <parameter value="-dependencyfile" />
-        <parameter value="D:\WorkSpaces\ZF_LiuzlWorks\target/.scala_dependencies" />
+        <parameter value="D:\CodeStation\WorkSpaces\ZF_LiuzlWorks\target/.scala_dependencies" />
       </parameters>
     </profile>
   </component>

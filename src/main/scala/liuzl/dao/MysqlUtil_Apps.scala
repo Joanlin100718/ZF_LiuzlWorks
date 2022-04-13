@@ -130,7 +130,7 @@ object MysqlUtil_Apps {
       ps.setString( 	3,	appOperationBean.employeeId)
       ps.setString( 	4,	appOperationBean.phoneNum)
       ps.setString( 	5,	appOperationBean.deviceId	)
-      ps.setString( 	6,	appOperationBean.versionCode)
+      ps.setString( 	6,	appOperationBean.versionCode )
       ps.setString( 	7,	appOperationBean.versionName	)
       ps.setString( 	8,	appOperationBean.`type`	)
       ps.setString( 	9,	appOperationBean.occurTime)

@@ -2,7 +2,7 @@ package liuzl.dao
 
 
 import liuzl.pojo._
-import liuzl.utils.JDBC_Druid
+import liuzl.utils.DruidUtils
 
 import java.sql.{Connection, PreparedStatement, ResultSet}
 import scala.collection.mutable.ListBuffer
@@ -24,7 +24,7 @@ object MysqlUtil_Apps_Batch {
   *
   * */
   def selectOffsetList (topic:String ) : ListBuffer[Long] ={
-    val conn:Connection=JDBC_Druid.getConnection
+    val conn:Connection = DruidUtils.getConnection
     var ps:PreparedStatement=null
     var rs:ResultSet=null
 
@@ -47,11 +47,11 @@ object MysqlUtil_Apps_Batch {
         list.append(rs.getInt("partition4").toLong)
         list.append(rs.getInt("partition5").toLong)
       }
-      JDBC_Druid.commit(conn)
+      DruidUtils.commit(conn)
     } catch {
       case t: Throwable => t.printStackTrace() // TODO: handle error
     }finally {
-      JDBC_Druid.close(ps,conn,rs)
+      DruidUtils.close(ps,conn,rs)
     }
     list
   }
@@ -62,7 +62,7 @@ object MysqlUtil_Apps_Batch {
   * 更新数据库中offset值
   * */
   def updateKafkaOffset(topic:String, partition : Int, offset:Long) : Unit ={
-    val conn:Connection=JDBC_Druid.getConnection
+    val conn:Connection=DruidUtils.getConnection
     var ps:PreparedStatement=null
     var rs:ResultSet=null
     try {
@@ -75,11 +75,11 @@ object MysqlUtil_Apps_Batch {
       ps.setString(2,topic)
 //      println("offset更新了")
       ps.executeUpdate()
-      JDBC_Druid.commit(conn)
+      DruidUtils.commit(conn)
     } catch {
       case t: Throwable => t.printStackTrace() // TODO: handle error
     }finally {
-      JDBC_Druid.close(ps,conn,rs)
+      DruidUtils.close(ps,conn,rs)
     }
   }
 
@@ -88,7 +88,7 @@ object MysqlUtil_Apps_Batch {
    * 数据存储到对应表中
    */
   def saveAppOperationToMySQL(listAppOperationBean: ListBuffer[AppOperationBean] ) = {
-    val conn:Connection=JDBC_Druid.getConnection
+    val conn:Connection=DruidUtils.getConnection
     var ps:PreparedStatement=null
     var rs:ResultSet=null
     try {
@@ -122,11 +122,11 @@ object MysqlUtil_Apps_Batch {
 
       println("本批次：" + batchIndex)
       ps.executeBatch()
-      JDBC_Druid.commit(conn)
+      DruidUtils.commit(conn)
     } catch {
       case t: Throwable => t.printStackTrace() // TODO: handle error
     }finally {
-      JDBC_Druid.close(ps,conn,rs)
+      DruidUtils.close(ps,conn,rs)
     }
   }
 
@@ -138,7 +138,7 @@ object MysqlUtil_Apps_Batch {
    * 数据存储到对应表中
    */
   def saveAppUsageFlowToMySQL(listAppUsageFlowBean: ListBuffer[ AppUsageFlowBean] ) = {
-    val conn:Connection=JDBC_Druid.getConnection
+    val conn:Connection=DruidUtils.getConnection
     var ps:PreparedStatement=null
     var rs:ResultSet=null
     try {
@@ -168,11 +168,11 @@ object MysqlUtil_Apps_Batch {
 
       println("本批次：" + batchIndex)
       ps.executeBatch()
-      JDBC_Druid.commit(conn)
+      DruidUtils.commit(conn)
     } catch {
       case t: Throwable => t.printStackTrace() // TODO: handle error
     }finally {
-      JDBC_Druid.close(ps , conn , rs)
+      DruidUtils.close(ps , conn , rs)
     }
   }
 
@@ -185,7 +185,7 @@ object MysqlUtil_Apps_Batch {
    * 数据存储到对应表中
    */
   def saveAppUsageDurationToMySQL(listAppUsageDurationBean: ListBuffer[AppUsageDurationBean] ) = {
-    val conn:Connection=JDBC_Druid.getConnection
+    val conn:Connection=DruidUtils.getConnection
     var ps:PreparedStatement=null
     var rs:ResultSet=null
     try {
@@ -217,12 +217,12 @@ object MysqlUtil_Apps_Batch {
 
       println("本批次：" + batchIndex)
       ps.executeBatch()
-      JDBC_Druid.commit(conn)
+      DruidUtils.commit(conn)
 
     } catch {
       case t: Throwable => t.printStackTrace() // TODO: handle error
     }finally {
-      JDBC_Druid.close(ps,conn,rs)
+      DruidUtils.close(ps,conn,rs)
     }
   }
 

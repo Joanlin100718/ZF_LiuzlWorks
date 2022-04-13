@@ -3,7 +3,7 @@ package liuzl.dao
 import com.mchange.v2.c3p0.ComboPooledDataSource
 import liuzl.dao.MysqlUtil_SysOamp.getDateFromTimeStamp
 import liuzl.pojo._
-import liuzl.utils.{JDBC_Druid, JDBC_Druid_SysOamp}
+import liuzl.utils.{DruidUtils, DruidSysOamp}
 
 import java.sql.{Connection, PreparedStatement, ResultSet}
 import java.text.SimpleDateFormat
@@ -26,7 +26,7 @@ object MysqlUtil_SysOamp_Batch {
     // 创建变长的List 存储数据返回
     val list = new ListBuffer[Long]
     try {
-      conn = JDBC_Druid_SysOamp.getConnection
+      conn = DruidSysOamp.getConnection
 
       // 查询offset
       //SQL语句
@@ -43,11 +43,11 @@ object MysqlUtil_SysOamp_Batch {
         list.append(rs.getInt("partition5").toLong)
 
       }
-      JDBC_Druid_SysOamp.commit(conn)
+      DruidSysOamp.commit(conn)
     } catch {
       case t: Throwable => t.printStackTrace() // TODO: handle error
     }finally {
-      JDBC_Druid_SysOamp.close(ps,conn,rs)
+      DruidSysOamp.close(ps,conn,rs)
     }
     list
   }
@@ -64,7 +64,7 @@ object MysqlUtil_SysOamp_Batch {
 
     try {
 
-      conn=JDBC_Druid_SysOamp.getConnection
+      conn=DruidSysOamp.getConnection
 
       // 更新offset 语句
       val updateSQL = "update historicalOffset set partition" + partition + "  = ?  where kafkaTopic =  ? "
@@ -77,12 +77,12 @@ object MysqlUtil_SysOamp_Batch {
 
       ps.executeUpdate()
 
-      JDBC_Druid_SysOamp.commit(conn)
+      DruidSysOamp.commit(conn)
 
     } catch {
       case t: Throwable => t.printStackTrace() // TODO: handle error
     }finally {
-      JDBC_Druid_SysOamp.close(ps,conn,rs)
+      DruidSysOamp.close(ps,conn,rs)
     }
 
   }
@@ -101,7 +101,7 @@ object MysqlUtil_SysOamp_Batch {
 
     try {
       //      conn=c3p0.getConnection
-      conn = JDBC_Druid_SysOamp.getConnection
+      conn = DruidSysOamp.getConnection
 
       var batchIndex = 0
 
@@ -131,11 +131,11 @@ object MysqlUtil_SysOamp_Batch {
 //      println("本批次：" + batchIndex)
 //
 //      ps.executeBatch()
-      JDBC_Druid_SysOamp.commit(conn)
+      DruidSysOamp.commit(conn)
     } catch {
       case t: Throwable => t.printStackTrace() // TODO: handle error
     }finally {
-      JDBC_Druid_SysOamp.close(ps,conn,rs)
+      DruidSysOamp.close(ps,conn,rs)
     }
   }
 

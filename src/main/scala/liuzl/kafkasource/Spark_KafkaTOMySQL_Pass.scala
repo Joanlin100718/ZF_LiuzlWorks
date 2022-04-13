@@ -96,6 +96,7 @@ object Spark_KafkaTOMySQL_Pass {
     // 构建返回数据的参数
     val messageHandler = (mam: MessageAndMetadata[String, String]) => ( mam.topic, mam.partition , mam.offset, mam.message()) //构建MessageAndMetadata
 
+
     // 获取topic 一个批次中的数据
     val kafkaSource: InputDStream[(String, Int, Long,  String)] = KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder, (String, Int , Long , String)](ssc, kafkaParams, fromOffsets , messageHandler);
 

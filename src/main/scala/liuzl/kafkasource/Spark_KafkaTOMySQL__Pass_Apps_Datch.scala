@@ -103,9 +103,9 @@ object Spark_KafkaTOMySQL__Pass_Apps_Datch {
         val valJson   = line._4        // 获取每一行中的value值
 
         println("Topic: " + topic + "\tPartition: " + partition + "\tOffset: " + offset)
-//        println(valJson)
+        println(valJson)
 
-        if (topic.equals("AppOperation") && valJson.startsWith("{")) { // 应用使用情况
+        /*if (topic.equals("AppOperation") && valJson.startsWith("{")) { // 应用使用情况
           // 存储应用使用情况
           saveAppOperation(topic , valJson)
         } else if (topic.equals("AppUsageFlow")&& valJson.startsWith("{")) { // 应用使用流量信息
@@ -115,9 +115,9 @@ object Spark_KafkaTOMySQL__Pass_Apps_Datch {
           // 存储应用使用时长
           saveAppUsageDuration(topic , valJson)
         }
-
+*/
         // 更新数据库中的offset
-        MysqlUtil_Apps_Batch.updateKafkaOffset(topic,partition,offset)
+//        MysqlUtil_Apps_Batch.updateKafkaOffset(topic,partition,offset)
       }
     }
     ssc.start()
